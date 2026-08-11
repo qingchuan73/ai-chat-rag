@@ -1,0 +1,243 @@
+/* 容器采用沉静的深木炭色 */
+.container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px;
+    box-sizing: border-box;
+    background-color: #111113; 
+    color: #a1a1aa; 
+    transition: padding 0.2s cubic-bezier(0.2, 0, 0, 1.0);
+}
+
+/* 折叠后的紧凑内边距 */
+.collapsed {
+    padding: 20px 8px;
+}
+
+/* ==========================================
+   1. 头部区域
+   ========================================== */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    margin-bottom: 24px;
+    padding: 0 4px;
+}
+
+.collapsed .header {
+    justify-content: center;
+    padding: 0;
+}
+
+/* 头部 Logo 文字渐变控制 */
+.logoText {
+    font-size: 15px;
+    font-weight: 600;
+    color: #f4f4f5; 
+    letter-spacing: 0.5px;
+    white-space: nowrap; /* 强行单行，不换行 */
+    overflow: hidden;    /* 隐藏超出 */
+    max-width: 150px;    /* 展开时的宽度上限 */
+    opacity: 1;
+    transition: opacity 0.2s ease, max-width 0.2s ease;
+}
+
+/* 收起时：透明度归零，宽度收缩 */
+.collapsed .logoText {
+    opacity: 0;
+    max-width: 0;
+}
+
+/* 折叠按钮 */
+.toggleBtn {
+    background: transparent;
+    border: none;
+    color: #71717a;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.toggleBtn:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    color: #e4e4e7;
+}
+
+/* ==========================================
+   2. 新建对话区
+   ========================================== */
+.actionArea {
+    margin-bottom: 24px;
+}
+
+.newChatBtn {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px; /* 间距 */
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    color: #e4e4e7;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    /* 新增对 gap 和 padding 的平滑过渡 */
+    transition: background-color 0.15s, border-color 0.15s, gap 0.2s ease, padding 0.2s ease;
+}
+
+.newChatBtn:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.actionIcon {
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+/* 按钮内文字渐变控制 */
+.btnText {
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 100px;
+    opacity: 1;
+    transition: opacity 0.18s ease, max-width 0.18s ease;
+}
+
+/* 收起状态：按钮演变为圆形图标 */
+.collapsed .newChatBtn {
+    gap: 0; /* 间距收回，保持图标完美居中 */
+    padding: 0;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin: 0 auto;
+}
+
+.collapsed .btnText {
+    opacity: 0;
+    max-width: 0;
+}
+
+.uploadBtn {
+    width: 100%;
+    margin-top: 8px;
+}
+
+/* ==========================================
+   3. 菜单/历史记录列表
+   ========================================== */
+.menuList {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    scrollbar-width: none; 
+}
+
+/* 历史列表的小分类标题 */
+.sectionTitle {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #52525b;
+    margin-bottom: 12px;
+    padding: 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 120px;
+    opacity: 1;
+    transition: opacity 0.15s ease, max-width 0.15s ease, margin 0.15s ease;
+}
+
+.collapsed .sectionTitle {
+    opacity: 0;
+    max-width: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.menuItemsWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* 通用菜单项 */
+.menuItem {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: #a1a1aa;
+    box-sizing: border-box;
+    transition: background-color 0.15s, color 0.15s, gap 0.2s ease, padding 0.2s ease;
+}
+
+.menuItem:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    color: #e4e4e7;
+}
+
+.menuIcon {
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+/* 历史标题文字渐变控制 */
+.menuText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* 文字多时展现省略号 */
+    max-width: 150px;
+    opacity: 1;
+    transition: opacity 0.2s ease, max-width 0.2s ease;
+}
+
+/* 折叠状态菜单项：居中，收缩文字与间距 */
+.collapsed .menuItem {
+    gap: 0;
+    padding: 0;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
+}
+
+.collapsed .menuText {
+    opacity: 0;
+    max-width: 0;
+}
+
+/* ==========================================
+   4. 底部设置区
+   ========================================== */
+.footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.02);
+    padding-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.collapsed .footer {
+    padding-top: 12px;
+}

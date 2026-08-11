@@ -1,0 +1,268 @@
+/* 极简木炭灰滚动容器 */
+.container {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    background-color: #18181b; 
+    padding: 40px 0;
+    box-sizing: border-box;
+    scroll-behavior: auto; /* 平滑滚动以适配锚点点击 */
+}
+
+/* 滚动条 */
+.container::-webkit-scrollbar { width: 8px; }
+.container::-webkit-scrollbar-track { background: transparent; }
+.container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.06); 
+    border-radius: 99px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+.container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.16); 
+    background-clip: padding-box;
+}
+
+/* 内部列表 */
+.listInner {
+    max-width: 840px; 
+    margin: 0 auto;   
+    padding: 0 24px;  
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    box-sizing: border-box;
+}
+
+.messageRow {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.userRow { justify-content: flex-end; }
+.assistantRow { justify-content: flex-start; }
+
+/* ==========================================================================
+   用户提问容器 & 悬停操作工具栏
+   ========================================================================== */
+.userBubbleContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    max-width: 70%;
+    position: relative;
+}
+
+.userBubble {
+    padding: 10px 18px;
+    background: #27272a; 
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.userText {
+    margin: 0;
+    color: #f4f4f5; 
+    font-size: 14.5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.userAttachmentList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.userAttachmentChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 7px 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #e4e4e7;
+    font-size: 13px;
+}
+
+.userAttachmentIcon {
+    flex-shrink: 0;
+    color: #a5b4fc;
+}
+
+.userAttachmentName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 
+   精致的悬停操作栏：
+   静止时隐藏，鼠标悬停到用户气泡容器时，优雅地淡入显现 
+*/
+.userActions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+}
+
+.userBubbleContainer:hover .userActions {
+    opacity: 1;
+}
+
+.userActions button {
+    background: transparent;
+    border: none;
+    color: #71717a;
+    font-size: 12.5px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: color 0.12s, background-color 0.12s;
+}
+
+.userActions button:hover {
+    color: #f4f4f5;
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+/* ==========================================================================
+   内嵌编辑面板（TextArea 与保存/取消按钮排版）
+   ========================================================================== */
+.editWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.editInput {
+    background: #18181b !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    color: #f4f4f5 !important;
+    padding: 6px 10px !important;
+    font-size: 14px !important;
+    box-shadow: none !important;
+}
+
+.editActionButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.editActionButtons button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s;
+}
+
+.saveBtn {
+    color: #34d399; /* 绿色勾 */
+}
+.saveBtn:hover {
+    background-color: rgba(52, 211, 153, 0.08);
+}
+
+.cancelBtn {
+    color: #f87171; /* 红色叉 */
+}
+.cancelBtn:hover {
+    background-color: rgba(248, 113, 113, 0.08);
+}
+
+/* ==========================================================================
+   AI 内容及 Markdown 排版
+   ========================================================================== */
+.assistantContent {
+    width: 100%;
+    padding-left: 24px;
+    box-sizing: border-box;
+    position: relative;
+    border-left: 2px solid transparent;
+    border-image: linear-gradient(
+        to bottom,
+        rgba(99, 102, 241, 0.3) 0%,   
+        rgba(168, 85, 247, 0.1) 40%,  
+        transparent 100%
+    ) 1;
+}
+
+.markdownWrapper {
+    color: #d4d4d8; 
+    font-size: 15.5px;
+    line-height: 1.8;
+}
+
+/* 剩下的 Markdown 基础标记排版保持原样不变 */
+.markdownWrapper > *:first-child { margin-top: 0; }
+.markdownWrapper > *:last-child { margin-bottom: 0; }
+.markdownWrapper p { margin: 0 0 16px 0; }
+.markdownWrapper h1, .markdownWrapper h2, .markdownWrapper h3 {
+    color: #f4f4f5; font-weight: 600; margin: 32px 0 16px 0; letter-spacing: -0.015em;
+}
+.markdownWrapper h1 { font-size: 21px; }
+.markdownWrapper h2 { font-size: 18px; }
+.markdownWrapper h3 { font-size: 16.5px; }
+.markdownWrapper ul, .markdownWrapper ol { margin: 0 0 16px 0; padding-left: 24px; color: #d4d4d8; }
+.markdownWrapper li { margin-bottom: 8px; }
+.markdownWrapper code {
+    background-color: #27272a; color: #fda4af; padding: 2px 6px; border-radius: 4px;
+    font-family: Consolas, Monaco, monospace; font-size: 13.5px;
+}
+.markdownWrapper pre code { background-color: transparent; color: inherit; padding: 0; border-radius: 0; }
+.markdownWrapper blockquote {
+    margin: 20px 0; padding: 8px 18px; border-left: 3px solid #52525b; color: #a1a1aa; background-color: #202024; border-radius: 4px;
+}
+.markdownWrapper a { color: #60a5fa; text-decoration: none; border-bottom: 1px dashed rgba(96, 165, 250, 0.4); transition: color 0.15s ease; }
+.markdownWrapper a:hover { color: #93c5fd; border-bottom-style: solid; }
+.markdownWrapper table { border-collapse: collapse; width: 100%; margin: 24px 0; font-size: 14.5px; }
+.markdownWrapper th, .markdownWrapper td { border: 1px solid #2d2d30; padding: 12px 16px; text-align: left; }
+.markdownWrapper th { background-color: #202024; color: #f4f4f5; font-weight: 500; }
+
+.sourceList {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.sourceTitle {
+    width: 100%;
+    color: #71717a;
+    font-size: 12px;
+}
+
+.sourceTag {
+    margin: 0;
+    max-width: 100%;
+    border-color: rgba(255, 255, 255, 0.08);
+    background: #202024;
+    color: #d4d4d8;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+}
+
+.sourceTag:hover {
+    border-color: rgba(96, 165, 250, 0.45);
+    background: rgba(96, 165, 250, 0.08);
+    color: #bfdbfe;
+}

@@ -1,0 +1,112 @@
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.title {
+    margin: 0;
+    color: #f4f4f5;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.subtitle {
+    margin: 0;
+    color: #a1a1aa;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.fileName {
+    color: #f4f4f5;
+    font-weight: 500;
+    word-break: break-all;
+}
+
+.meta {
+    margin-top: 4px;
+    color: #71717a;
+    font-size: 12px;
+}
+
+.emptyHint {
+    color: #a1a1aa;
+}
+
+.drawer :global(.ant-drawer-content) {
+    background: #18181b;
+}
+
+.drawer :global(.ant-drawer-close) {
+    color: #a1a1aa;
+}
+
+.drawer :global(.ant-drawer-close:hover) {
+    color: #f4f4f5;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.table :global(.ant-table) {
+    background: #18181b;
+    color: #d4d4d8;
+}
+
+.table :global(.ant-table-container) {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table :global(.ant-table-thead > tr > th) {
+    background: #202024 !important;
+    color: #a1a1aa !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    font-weight: 500;
+}
+
+.table :global(.ant-table-thead > tr > th::before) {
+    display: none;
+}
+
+.table :global(.ant-table-tbody > tr > td) {
+    background: #18181b;
+    color: #d4d4d8;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.table :global(.ant-table-tbody > tr:hover > td) {
+    background: #202024 !important;
+}
+
+.table :global(.ant-table-tbody > tr.ant-table-placeholder > td) {
+    background: #18181b !important;
+}
+
+.table :global(.ant-empty-description) {
+    color: #a1a1aa;
+}
+
+.table :global(.ant-btn) {
+    background: #27272a;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #d4d4d8;
+}
+
+.table :global(.ant-btn:hover) {
+    background: #323238 !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    color: #f4f4f5 !important;
+}
+
+.table :global(.ant-btn-dangerous) {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.28);
+}
+
+.table :global(.ant-btn-dangerous:hover) {
+    background: rgba(248, 113, 113, 0.1) !important;
+    border-color: rgba(248, 113, 113, 0.45) !important;
+    color: #fca5a5 !important;
+}

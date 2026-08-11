@@ -1,0 +1,221 @@
+.modalRoot,
+.modalRoot :global(.ant-modal-root),
+.modalRoot :global(.ant-modal-wrap),
+.modalWrap {
+    background: transparent !important;
+}
+
+.modalRoot :global(.ant-modal) {
+    color: #e4e4e7;
+    padding: 0 !important;
+    background: #18181b !important;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.modalRoot :global(.ant-modal-content) {
+    background: #18181b !important;
+    color: #e4e4e7;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+    padding: 0 !important;
+    overflow: hidden;
+    
+    /* 关键属性：消除获得焦点时的白框 */
+    outline: none !important;
+}
+
+.modalRoot :global(.ant-modal-header),
+.modalRoot :global(.ant-modal-body),
+.modalRoot :global(.ant-modal-footer) {
+    background: #18181b !important;
+}
+
+.modalRoot :global(.ant-modal-header) {
+    margin: 0 !important;
+    padding: 28px 32px 20px !important;
+}
+
+.modalRoot :global(.ant-modal-body) {
+    padding: 0 32px 18px !important;
+}
+
+.modalRoot :global(.ant-modal-footer) {
+    margin: 0 !important;
+    padding: 18px 32px 28px !important;
+}
+
+.modalRoot :global(.ant-modal-mask) {
+    background: rgba(0, 0, 0, 0.68) !important;
+}
+
+.modal {
+    background: #18181b !important;
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 0 !important;
+}
+
+.modal :global(.ant-modal-content) {
+    background: #18181b !important;
+    color: #e4e4e7;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+    
+    /* 关键属性：消除获得焦点时的白框 */
+    outline: none !important;
+}
+
+.modal :global(.ant-modal-header) {
+    background: #18181b;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding-bottom: 14px;
+    margin: 0 !important;
+}
+
+.modal :global(.ant-modal-title) {
+    color: #f4f4f5;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.modal :global(.ant-modal-close) {
+    color: #a1a1aa;
+}
+
+.modal :global(.ant-modal-footer) {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 14px;
+    margin: 0 !important;
+}
+
+.modal :global(.ant-form-item-label > label) {
+    color: #d4d4d8;
+}
+
+.modal :global(.ant-input),
+.modal :global(.ant-input-password),
+.modal :global(.ant-input-affix-wrapper) {
+    background: #202024;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f4f4f5;
+}
+
+.modal :global(.ant-input:hover),
+.modal :global(.ant-input-password:hover),
+.modal :global(.ant-input-affix-wrapper:hover),
+.modal :global(.ant-input:focus),
+.modal :global(.ant-input-password-focused),
+.modal :global(.ant-input-affix-wrapper-focused) {
+    border-color: rgba(96, 165, 250, 0.45);
+    box-shadow: none;
+}
+
+.modal :global(.ant-input-affix-wrapper .ant-input) {
+    background: transparent;
+}
+
+.modal :global(.ant-input-password-icon) {
+    color: #a1a1aa;
+}
+
+.modal :global(.ant-input::placeholder) {
+    color: #71717a;
+}
+
+.modal :global(input:-webkit-autofill),
+.modal :global(input:-webkit-autofill:hover),
+.modal :global(input:-webkit-autofill:focus) {
+    -webkit-text-fill-color: #f4f4f5;
+    box-shadow: 0 0 0 1000px #202024 inset;
+    caret-color: #f4f4f5;
+}
+
+.modal :global(.ant-btn-default) {
+    background: #27272a;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #d4d4d8;
+}
+
+.modal :global(.ant-btn-default:hover) {
+    background: #323238 !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    color: #f4f4f5 !important;
+}
+
+.modal :global(.ant-btn-dangerous) {
+    background: rgba(248, 113, 113, 0.08);
+    border-color: rgba(248, 113, 113, 0.26);
+    color: #f87171;
+}
+
+.modal :global(.ant-btn-dangerous:hover) {
+    background: rgba(248, 113, 113, 0.14) !important;
+    border-color: rgba(248, 113, 113, 0.42) !important;
+    color: #fca5a5 !important;
+}
+
+.section {
+    padding: 2px 0 20px;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.sectionTitle {
+    margin: 0;
+    color: #f4f4f5;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.hint {
+    margin: 0 0 18px;
+    color: #a1a1aa;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.status {
+    flex-shrink: 0;
+    color: #a5b4fc;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(99, 102, 241, 0.12);
+    border: 1px solid rgba(165, 180, 252, 0.16);
+}
+
+.secondaryDanger {
+    background: rgba(248, 113, 113, 0.08);
+    border-color: rgba(248, 113, 113, 0.25);
+}
+
+.defaultButton {
+    background: #27272a;
+}
+
+.logoutButton {
+    flex-shrink: 0;
+}
+
+.dangerSection {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: center;
+    padding: 18px;
+    border: 1px solid rgba(248, 113, 113, 0.16);
+    border-radius: 8px;
+    background: rgba(248, 113, 113, 0.06);
+}
+
+/* 在你的 ModelConfigModal.module.css 中添加 */
+.modalRoot :global(.ant-modal-container) {
+    padding: 0 !important; /* 或者是你提到的 .ant-modal-container */
+}

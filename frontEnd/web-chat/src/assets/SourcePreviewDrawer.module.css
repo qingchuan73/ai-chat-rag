@@ -1,0 +1,57 @@
+.drawer :global(.ant-drawer-content) {
+    background: #18181b;
+}
+
+.drawer :global(.ant-drawer-close) {
+    color: #a1a1aa;
+}
+
+.drawer :global(.ant-drawer-header) {
+    background: #18181b;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.fileName {
+    color: #f4f4f5;
+    font-size: 15px;
+    font-weight: 600;
+    word-break: break-all;
+}
+
+.meta {
+    color: #a1a1aa;
+    font-size: 12px;
+}
+
+.body {
+    height: 100%;
+    min-height: 70vh;
+}
+
+.frame {
+    width: 100%;
+    height: calc(100vh - 120px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    background: #111113;
+}
+
+.unsupported {
+    min-height: 360px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    color: #a1a1aa;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    background: #111113;
+}
