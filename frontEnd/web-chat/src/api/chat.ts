@@ -9,17 +9,17 @@ export function getStart() {
 
 
 export function getMessages(conversationId: number) {
-    return request.get(`/api/conversation/${conversationId}/messages`);
+    return request.get(`/conversation/${conversationId}/messages`);
 }
 
 
 export function getAllConversations() {
-    return request.get("/api/conversation");
+    return request.get("/conversation");
 }
 
 
 export async function createConversation() {
-    const data: any = await request.post("/api/conversation");
+    const data: any = await request.post("/conversation");
 
     localStorage.setItem("conversation_id", data.id);
     return data;
@@ -32,7 +32,7 @@ export async function sendMessage(
 ) {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`${API_BASE_URL}/api/chat`, {
+    const res = await fetch(`${API_BASE_URL}/chat`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

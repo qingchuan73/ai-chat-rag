@@ -5,7 +5,7 @@ export function register (
     data:RegisterRequest
 ){
     return request.post(
-        "/api/auth/register",
+        "/auth/register",
         data
     )
 }
@@ -14,7 +14,7 @@ export function login(
     data:LoginRequest
 ){
     return request.post(
-        "/api/auth/login",
+        "/auth/login",
         data
     )
 }

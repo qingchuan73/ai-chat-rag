@@ -3,15 +3,15 @@ import type { ModelConfigPayload } from "../types/modelConfig";
 
 
 export function getModelConfig() {
-    return request.get("/api/settings/model");
+    return request.get("/settings/model");
 }
 
 
 export function saveModelConfig(data: ModelConfigPayload) {
-    return request.post("/api/settings/model", data);
+    return request.post("/settings/model", data);
 }
 
 
 export function deleteModelConfig() {
-    return request.delete("/api/settings/model");
+    return request.delete("/settings/model");
 }
