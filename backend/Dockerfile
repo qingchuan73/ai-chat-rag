@@ -11,6 +11,13 @@ RUN pip install \
     --no-cache-dir \
     --timeout 120 \
     --retries 5 \
+    --index-url https://download.pytorch.org/whl/cpu \
+    torch==2.6.0+cpu
+
+RUN pip install \
+    --no-cache-dir \
+    --timeout 120 \
+    --retries 5 \
     -i https://pypi.tuna.tsinghua.edu.cn/simple \
     -r requirements.txt
 
