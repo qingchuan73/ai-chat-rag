@@ -39,12 +39,13 @@ services:
       MODEL_CONFIG_SECRET: ${MODEL_CONFIG_SECRET:-change-me-in-production-too}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,http://127.0.0.1}
       CHROMA_PATH: ${CHROMA_PATH:-/app/chroma}
-      EMBEDDING_MODEL_NAME: ${EMBEDDING_MODEL_NAME:-BAAI/bge-small-zh}
-      EMBEDDING_LOCAL_ONLY: ${EMBEDDING_LOCAL_ONLY:-false}
+      EMBEDDING_MODEL_NAME: ${EMBEDDING_MODEL_NAME:-/app/models/bge-small-zh}
+      EMBEDDING_LOCAL_ONLY: ${EMBEDDING_LOCAL_ONLY:-true}
     volumes:
       - backend_uploads:/app/uploads
       - chroma_data:/app/chroma
       - hf_cache:/root/.cache/huggingface
+      - ./models:/app/models
     depends_on:
       mysql:
         condition: service_healthy

@@ -21,6 +21,8 @@ backend/.env
 backend/uploads/
 backend/chroma/
 chroma/
+models/*
+!models/.gitkeep
 *.sqlite
 *.sqlite3
 *.db

@@ -24,8 +24,9 @@ def get_embedding_model():
         if EMBEDDING_LOCAL_ONLY:
             raise RuntimeError(
                 "Embedding model is not available locally. "
-                "Download BAAI/bge-small-zh once, set EMBEDDING_MODEL_NAME to a local model path, "
-                "or set EMBEDDING_LOCAL_ONLY=false to allow HuggingFace download."
+                "For Docker deployment, place the BAAI/bge-small-zh model under ./models/bge-small-zh "
+                "and set EMBEDDING_MODEL_NAME=/app/models/bge-small-zh. "
+                "Alternatively, set EMBEDDING_LOCAL_ONLY=false to allow HuggingFace download."
             ) from exc
 
         raise
