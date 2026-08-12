@@ -1,4 +1,5 @@
 import os
+import hashlib
 from datetime import datetime,timedelta  
 from dotenv import load_dotenv
 from jose import jwt,JWTError
@@ -16,17 +17,37 @@ pwd_context = CryptContext(schemes=["bcrypt"])
 ALGORITHM="HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
+
+def normalize_password(password):
+    return hashlib.sha256(
+        password.encode("utf-8")
+    ).hexdigest()
+
+
 def hash_password(password):
-    return pwd_context.hash(password)
+    return pwd_context.hash(
+        normalize_password(password)
+    )
 
 def verify_password(
     password,
     password_hash
 ):
-    return pwd_context.verify(
-        password,
-        password_hash
-    )
+    normalized_password = normalize_password(password)
+
+    if pwd_context.verify(normalized_password, password_hash):
+        return True
+
+    if len(password.encode("utf-8")) <= 72:
+        try:
+            return pwd_context.verify(
+                password,
+                password_hash
+            )
+        except ValueError:
+            return False
+
+    return False
     
 def create_token(user_id):
     data={

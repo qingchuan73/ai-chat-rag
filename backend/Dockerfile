@@ -6,7 +6,6 @@ ENV PYTHONPATH=/app:/app/app
 
 WORKDIR /app
 
-COPY requirements.txt .
 RUN pip install \
     --no-cache-dir \
     --timeout 120 \
@@ -14,6 +13,7 @@ RUN pip install \
     --index-url https://download.pytorch.org/whl/cpu \
     torch==2.6.0+cpu
 
+COPY requirements.txt .
 RUN pip install \
     --no-cache-dir \
     --timeout 120 \
