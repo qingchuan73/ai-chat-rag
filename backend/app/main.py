@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.conversation import router as conversation_router
 from api.auth import router as auth_router
 from api.settings import router as settings_router
+from api.rag_trace import router as rag_trace_router
 
 
 
@@ -43,6 +44,7 @@ app.include_router(conversation_router, prefix="/api")
 app.include_router(auth_router,prefix="/api")
 app.include_router(file_router,prefix="/api")
 app.include_router(settings_router,prefix="/api")
+app.include_router(rag_trace_router,prefix="/api")
 @app.get("/")
 def read_root():
     return {

@@ -1,5 +1,9 @@
 from logging.config import fileConfig
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from app.database.database import Base
 from app.database import models
 

@@ -60,3 +60,49 @@ body {
 .ant-modal-root .ant-modal-close {
     color: #a1a1aa !important;
 }
+
+.empty-chat-shell {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 0;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.empty-chat-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(100%, 760px);
+    transform: translateY(-6vh);
+}
+
+.empty-chat-title {
+    margin: 0 0 28px;
+    color: #f4f4f5;
+    font-size: clamp(24px, 3.2vw, 36px);
+    font-weight: 650;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.empty-chat-input {
+    width: 100%;
+}
+
+.empty-chat-config-btn {
+    margin-top: 18px;
+    padding: 9px 16px;
+    color: #f4f4f5;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: #27272a;
+}
+
+.empty-chat-config-btn:hover {
+    background: #323238;
+}

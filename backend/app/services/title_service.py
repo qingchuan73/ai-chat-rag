@@ -7,14 +7,14 @@ def generate_title(content: str, model_config):
             "role": "user",
             "content":
             f"""
-            Generate a short chat title from the user's first message.
+            请根据用户第一条消息生成一个简短会话标题。
 
-            Requirements:
-            1. No more than 20 Chinese characters or 8 English words.
-            2. Do not add quotes.
-            3. Return only the title.
+            要求：
+            1. 不超过 20 个中文字符或 8 个英文单词。
+            2. 不要加引号。
+            3. 只返回标题，不要解释。
 
-            User message:
+            用户消息：
             {content}
             """
         }

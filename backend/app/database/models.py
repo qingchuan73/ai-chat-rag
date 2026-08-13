@@ -226,3 +226,67 @@ class UserModelConfig(Base):
         back_populates="model_config"
     )
 
+
+class RagTrace(Base):
+    __tablename__ = "rag_trace"
+
+    id = Column(
+        Integer,
+        primary_key=True
+    )
+
+    user_id = Column(
+        Integer,
+        ForeignKey("user.id"),
+        nullable=False,
+        index=True
+    )
+
+    conversation_id = Column(
+        Integer,
+        ForeignKey("conversation.id"),
+        nullable=False,
+        index=True
+    )
+
+    question = Column(
+        Text,
+        nullable=False
+    )
+
+    rewritten_query = Column(
+        Text,
+        nullable=True
+    )
+
+    question_type = Column(
+        String(50),
+        nullable=True
+    )
+
+    used_knowledge = Column(
+        String(10),
+        nullable=False,
+        default="false"
+    )
+
+    expanded_queries = Column(
+        Text,
+        nullable=True
+    )
+
+    retrieved_count = Column(
+        Integer,
+        default=0
+    )
+
+    selected_sources = Column(
+        Text,
+        nullable=True
+    )
+
+    created_at = Column(
+        DateTime,
+        default=func.now()
+    )
+

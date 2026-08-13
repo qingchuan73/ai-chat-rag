@@ -9,6 +9,9 @@ from database.chroma import collection
 RAG_SIMILARITY_THRESHOLD = 0.55
 BM25_TOP_K_MULTIPLIER = 4
 DENSE_TOP_K_MULTIPLIER = 4
+LOW_PRIORITY_PENALTY = 0.2
+YEAR_MATCH_BOOST = 0.12
+BODY_CONTENT_BOOST = 0.08
 
 STOP_WORDS = {
     "当前",
@@ -139,6 +142,34 @@ def make_chunk_key(chunk):
     )
 
 
+def extract_query_years(query):
+    return set(
+        re.findall(
+            r"(20\d{2}|R1[5-9]|R2[0-9])",
+            query or ""
+        )
+    )
+
+
+def get_rank_score(chunk, query_years=None):
+    metadata = chunk.get("metadata") or {}
+    score = float(chunk.get("similarity", 0))
+    priority = int(metadata.get("priority") or 1)
+    content_type = metadata.get("content_type")
+    year_labels = str(metadata.get("year_labels") or "")
+
+    if priority >= 3:
+        score -= LOW_PRIORITY_PENALTY
+
+    if content_type == "body":
+        score += BODY_CONTENT_BOOST
+
+    if query_years and any(year in year_labels for year in query_years):
+        score += YEAR_MATCH_BOOST
+
+    return score
+
+
 def search_bm25_vectors(
     query,
     user_id,
@@ -249,10 +280,12 @@ def search_dense_vectors(
 def merge_retrieval_results(
     bm25_chunks,
     dense_chunks,
-    top_k
+    top_k,
+    query=None
 ):
     merged = []
     seen = set()
+    query_years = extract_query_years(query)
 
     for chunk in bm25_chunks + dense_chunks:
         key = make_chunk_key(chunk)
@@ -264,9 +297,9 @@ def merge_retrieval_results(
         merged.append(chunk)
 
     merged.sort(
-        key=lambda chunk: (
-            chunk.get("retrieval_type") == "bm25",
-            chunk.get("similarity", 0)
+        key=lambda chunk: get_rank_score(
+            chunk,
+            query_years=query_years
         ),
         reverse=True
     )
@@ -296,5 +329,6 @@ def search_vectors(
     return merge_retrieval_results(
         bm25_chunks=bm25_chunks,
         dense_chunks=dense_chunks,
-        top_k=top_k
+        top_k=top_k,
+        query=query
     )

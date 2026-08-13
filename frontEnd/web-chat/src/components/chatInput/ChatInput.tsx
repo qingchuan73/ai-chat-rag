@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Input, Button, message as antdMessage, Spin } from "antd";
-import { SendOutlined, PaperClipOutlined, LoadingOutlined } from "@ant-design/icons";
+import { Button, Input, Spin, message as antdMessage } from "antd";
+import { LoadingOutlined, PaperClipOutlined, SendOutlined } from "@ant-design/icons";
 import styles from "../../assets/ChatInput.module.css";
 import { uploadFile } from "../../api/file";
 import AttachmentChip from "./AttachmentChip";
@@ -28,13 +28,19 @@ const ALLOWED_EXTENSIONS = new Set([
     "rst"
 ]);
 
-
 interface ChatInputProps {
     onSend: (content: string, attachments: AttachmentItem[]) => void;
+    disabled?: boolean;
+    disabledReason?: string;
+    placeholder?: string;
 }
 
-
-function ChatInput({ onSend }: ChatInputProps) {
+function ChatInput({
+    onSend,
+    disabled = false,
+    disabledReason,
+    placeholder = "有问题，尽管问"
+}: ChatInputProps) {
     const [content, setContent] = useState("");
     const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
     const [uploadingFiles, setUploadingFiles] = useState<string[]>([]);
@@ -49,6 +55,13 @@ function ChatInput({ onSend }: ChatInputProps) {
     );
 
     const send = () => {
+        if (disabled) {
+            if (disabledReason) {
+                antdMessage.warning(disabledReason);
+            }
+            return;
+        }
+
         if (isUploading) {
             antdMessage.info("文件还在上传，请稍等");
             return;
@@ -74,6 +87,13 @@ function ChatInput({ onSend }: ChatInputProps) {
     };
 
     const handleDroppedFile = async (file: File) => {
+        if (disabled) {
+            if (disabledReason) {
+                antdMessage.warning(disabledReason);
+            }
+            return;
+        }
+
         if (!isAllowedFile(file)) {
             antdMessage.warning("只允许上传常见文本、PDF、Word 等文档");
             return;
@@ -136,14 +156,20 @@ function ChatInput({ onSend }: ChatInputProps) {
     return (
         <div className={styles.container}>
             <div
-                className={`${styles.inputBox} ${isDragging ? styles.dragging : ""}`}
+                className={`${styles.inputBox} ${isDragging ? styles.dragging : ""} ${disabled ? styles.disabled : ""}`}
                 onDragOver={(e) => {
                     e.preventDefault();
-                    setIsDragging(true);
+                    if (!disabled) {
+                        setIsDragging(true);
+                    }
                 }}
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={handleDrop}
             >
+                {disabled && disabledReason && (
+                    <div className={styles.disabledNotice}>{disabledReason}</div>
+                )}
+
                 {(hasAttachments || isUploading) && (
                     <div className={styles.attachmentRow} title={normalizedAttachments}>
                         {attachments.map((item) => (
@@ -170,13 +196,14 @@ function ChatInput({ onSend }: ChatInputProps) {
                 <div className={styles.inputRow}>
                     <TextArea
                         className={styles.textarea}
-                        placeholder="有问题，尽管问"
+                        placeholder={placeholder}
                         autoSize={{
                             minRows: 1,
                             maxRows: 5
                         }}
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
+                        disabled={disabled}
                         onDrop={handleDrop}
                         onPressEnter={(e) => {
                             if (!e.shiftKey) {
@@ -194,6 +221,7 @@ function ChatInput({ onSend }: ChatInputProps) {
                                 multiple
                                 accept=".txt,.md,.markdown,.csv,.tsv,.log,.json,.yaml,.yml,.xml,.pdf,.doc,.docx,.rtf,.html,.htm,.rst"
                                 className={styles.fileInput}
+                                disabled={disabled}
                                 onChange={(e) => {
                                     handlePickFiles(e.target.files);
                                     e.currentTarget.value = "";
@@ -206,7 +234,7 @@ function ChatInput({ onSend }: ChatInputProps) {
                             shape="circle"
                             icon={<SendOutlined />}
                             onClick={send}
-                            disabled={isUploading}
+                            disabled={disabled || isUploading}
                         />
                     </div>
                 </div>

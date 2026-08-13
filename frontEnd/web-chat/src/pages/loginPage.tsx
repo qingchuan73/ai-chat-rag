@@ -22,10 +22,14 @@ function LoginPage() {
 
 
             const token = response.access_token || response.data?.access_token;
+            const username = response.username || response.data?.username;
 
             if (token) {
 
                 localStorage.setItem("token", token);
+                if (username) {
+                    localStorage.setItem("username", username);
+                }
                 antdMessage.success("登录成功");
 
 

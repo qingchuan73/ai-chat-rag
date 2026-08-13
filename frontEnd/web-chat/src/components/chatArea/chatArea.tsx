@@ -13,10 +13,20 @@ interface ChatAreaProps {
     conversationId: number | null;
     onConversationCreated: (newId: number) => void;
     onRefreshConversations: () => void;
+    username: string;
+    modelConfigured: boolean;
+    onOpenModelConfig: () => void;
 }
 
 
-function ChatArea({ conversationId, onConversationCreated, onRefreshConversations }: ChatAreaProps) {
+function ChatArea({
+    conversationId,
+    onConversationCreated,
+    onRefreshConversations,
+    username,
+    modelConfigured,
+    onOpenModelConfig
+}: ChatAreaProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [showAnchor, setShowAnchor] = useState(true);
     const [previewSource, setPreviewSource] = useState<MessageSource | null>(null);
@@ -170,6 +180,9 @@ function ChatArea({ conversationId, onConversationCreated, onRefreshConversation
         return () => window.removeEventListener("resize", updateAnchorVisibility);
     }, []);
 
+    const isEmptyChat = messages.length === 0;
+    const disabledReason = modelConfigured ? undefined : "请先在设置中配置模型 API Key 后再开始对话";
+
     return (
         <Layout style={{ height: "100%", width: "100%", background: "#18181b" }}>
             {showAnchor && anchorItems.length > 0 && (
@@ -201,24 +214,52 @@ function ChatArea({ conversationId, onConversationCreated, onRefreshConversation
                 padding: "0 16px",
                 margin: "0 auto"
             }}>
-                <div style={{ flex: 1, overflow: "hidden", width: "100%", background: "#18181b" }}>
-                    <MessageList
-                        messages={messages}
-                        onOpenSource={setPreviewSource}
-                    />
-                </div>
-                <div style={{
-                    background: "#18181b",
-                    padding: "16px 0 24px 0",
-                    width: "100%",
-                    borderTop: "1px solid rgba(255, 255, 255, 0.02)",
-                    display: "flex",
-                    justifyContent: "center"
-                }}>
-                    <div style={{ width: "100%", maxWidth: "880px", padding: "0 24px", boxSizing: "border-box" }}>
-                        <ChatInput onSend={handleSend} />
+                {isEmptyChat ? (
+                    <div className="empty-chat-shell">
+                        <div className="empty-chat-center">
+                            <h1 className="empty-chat-title">{username || "你好"}，我们开始吧</h1>
+                            <div className="empty-chat-input">
+                                <ChatInput
+                                    onSend={handleSend}
+                                    disabled={!modelConfigured}
+                                    disabledReason={disabledReason}
+                                    placeholder={modelConfigured ? "问点什么，或者拖入文件" : "请先配置模型"}
+                                />
+                            </div>
+                            {!modelConfigured && (
+                                <button className="empty-chat-config-btn" onClick={onOpenModelConfig}>
+                                    去配置模型
+                                </button>
+                            )}
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <>
+                        <div style={{ flex: 1, overflow: "hidden", width: "100%", background: "#18181b" }}>
+                            <MessageList
+                                messages={messages}
+                                onOpenSource={setPreviewSource}
+                            />
+                        </div>
+                        <div style={{
+                            background: "#18181b",
+                            padding: "16px 0 24px 0",
+                            width: "100%",
+                            borderTop: "1px solid rgba(255, 255, 255, 0.02)",
+                            display: "flex",
+                            justifyContent: "center"
+                        }}>
+                            <div style={{ width: "100%", maxWidth: "880px", padding: "0 24px", boxSizing: "border-box" }}>
+                                <ChatInput
+                                    onSend={handleSend}
+                                    disabled={!modelConfigured}
+                                    disabledReason={disabledReason}
+                                    placeholder={modelConfigured ? "有问题，尽管问" : "请先配置模型"}
+                                />
+                            </div>
+                        </div>
+                    </>
+                )}
             </Content>
 
             <SourcePreviewDrawer

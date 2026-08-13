@@ -12,26 +12,27 @@ def generate_summary(messages, old_summary=None, model_config=None):
             "role": "system",
             "content":
             """
-            You maintain long-term conversation memory.
-            Merge the old summary and new messages into a concise summary.
+            你负责维护长期对话记忆。
+            请把旧摘要和新消息合并成一份简洁摘要。
 
-            Keep:
-            1. User goals
-            2. User preferences
-            3. Project information
-            4. Completed work
+            保留：
+            1. 用户目标
+            2. 用户偏好
+            3. 项目信息
+            4. 已完成工作
+            5. 重要决策和未解决问题
 
-            Remove casual small talk.
+            删除闲聊和无长期价值的信息。
             """
         },
         {
             "role": "user",
             "content":
             f"""
-            Old summary:
+            旧摘要：
             {old_summary or ""}
 
-            New messages:
+            新消息：
             {text}
             """
         }
