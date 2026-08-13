@@ -14,6 +14,12 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     username: str
+
+
+class UserInfoResponse(BaseModel):
+    id: int
+    username: str
+    account: str
     
 class MessageResponse(BaseModel):
     message: str

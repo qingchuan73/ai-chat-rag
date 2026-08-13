@@ -1,13 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { Layout, Anchor, message as antdMessage } from "antd";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Anchor, Layout, message as antdMessage } from "antd";
 import MessageList from "../messageList/MessageList";
 import ChatInput from "../chatInput/ChatInput";
 import SourcePreviewDrawer from "../sourcePreview/SourcePreviewDrawer";
-import { sendMessage, createConversation, getMessages } from "../../api/chat";
+import { createConversation, getMessages, sendMessage } from "../../api/chat";
 import type { AttachmentItem, Message, MessageSource } from "../../types/message";
 
 const { Content } = Layout;
-
 
 interface ChatAreaProps {
     conversationId: number | null;
@@ -15,9 +14,9 @@ interface ChatAreaProps {
     onRefreshConversations: () => void;
     username: string;
     modelConfigured: boolean;
+    modelConfigReady: boolean;
     onOpenModelConfig: () => void;
 }
-
 
 function ChatArea({
     conversationId,
@@ -25,6 +24,7 @@ function ChatArea({
     onRefreshConversations,
     username,
     modelConfigured,
+    modelConfigReady,
     onOpenModelConfig
 }: ChatAreaProps) {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -181,7 +181,8 @@ function ChatArea({
     }, []);
 
     const isEmptyChat = messages.length === 0;
-    const disabledReason = modelConfigured ? undefined : "请先在设置中配置模型 API Key 后再开始对话";
+    const modelDisabled = modelConfigReady && !modelConfigured;
+    const disabledReason = modelDisabled ? "请先在设置中配置模型 API Key 后再开始对话" : undefined;
 
     return (
         <Layout style={{ height: "100%", width: "100%", background: "#18181b" }}>
@@ -221,12 +222,12 @@ function ChatArea({
                             <div className="empty-chat-input">
                                 <ChatInput
                                     onSend={handleSend}
-                                    disabled={!modelConfigured}
+                                    disabled={modelDisabled}
                                     disabledReason={disabledReason}
-                                    placeholder={modelConfigured ? "问点什么，或者拖入文件" : "请先配置模型"}
+                                    placeholder={modelDisabled ? "请先配置模型" : "问点什么，或者拖入文件"}
                                 />
                             </div>
-                            {!modelConfigured && (
+                            {modelDisabled && (
                                 <button className="empty-chat-config-btn" onClick={onOpenModelConfig}>
                                     去配置模型
                                 </button>
@@ -252,9 +253,9 @@ function ChatArea({
                             <div style={{ width: "100%", maxWidth: "880px", padding: "0 24px", boxSizing: "border-box" }}>
                                 <ChatInput
                                     onSend={handleSend}
-                                    disabled={!modelConfigured}
+                                    disabled={modelDisabled}
                                     disabledReason={disabledReason}
-                                    placeholder={modelConfigured ? "有问题，尽管问" : "请先配置模型"}
+                                    placeholder={modelDisabled ? "请先配置模型" : "有问题，尽管问"}
                                 />
                             </div>
                         </div>

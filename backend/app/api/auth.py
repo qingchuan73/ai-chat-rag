@@ -5,18 +5,21 @@ from schemas.auth import (
     RegisterRequest,
     LoginRequest,
     TokenResponse,    
-    MessageResponse     
+    MessageResponse,
+    UserInfoResponse
 )
 
 from crud.user import (
     create_user,
-    get_user_by_account
+    get_user_by_account,
+    get_user_by_id
 )
 
 from services.auth_service import (
     hash_password,
     verify_password,
-    create_token
+    create_token,
+    get_current_user_id
 )
 
 router = APIRouter(
@@ -81,4 +84,30 @@ def login(
         "access_token": token,
         "token_type": "bearer",
         "username": user.username
+    }
+
+
+@router.get(
+    "/me",
+    response_model=UserInfoResponse
+)
+def get_current_user(
+    db=Depends(get_db),
+    user_id: int = Depends(get_current_user_id)
+):
+    user = get_user_by_id(
+        db,
+        user_id
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="用户不存在"
+        )
+
+    return {
+        "id": user.id,
+        "username": user.username,
+        "account": user.account
     }

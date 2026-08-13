@@ -10,6 +10,17 @@ def get_user_by_account(
     ).filter(
         User.account==account
     ).first()
+
+
+def get_user_by_id(
+    db: Session,
+    user_id: int
+):
+    return db.query(
+        User
+    ).filter(
+        User.id == user_id
+    ).first()
     
 def create_user(
     db,
