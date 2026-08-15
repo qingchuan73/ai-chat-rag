@@ -41,6 +41,13 @@ def serialize_message_content(message):
             "url": payload.get("url"),
             "prompt": payload.get("prompt") or ""
         }
+        return base
+
+    if isinstance(payload, dict) and payload.get("type") == "text":
+        base["content"] = payload.get("content") or ""
+        sources = payload.get("sources")
+        if isinstance(sources, list):
+            base["sources"] = sources
 
     return base
 

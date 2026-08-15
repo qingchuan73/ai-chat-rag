@@ -44,6 +44,38 @@ RAG_SYNTHESIS_TOP_K = 18
 RAG_SYNTHESIS_QUERY_TOP_K = 8
 
 
+def get_message_text(content):
+    try:
+        payload = json.loads(content)
+    except Exception:
+        return content
+
+    if not isinstance(payload, dict):
+        return content
+
+    if payload.get("type") == "image":
+        return payload.get("prompt") or ""
+
+    if payload.get("type") == "text":
+        return payload.get("content") or ""
+
+    return content
+
+
+def build_assistant_message_content(content, sources=None):
+    if not sources:
+        return content
+
+    return json.dumps(
+        {
+            "type": "text",
+            "content": content,
+            "sources": sources
+        },
+        ensure_ascii=False
+    )
+
+
 def build_image_attachment_content(db, user_id, question, attachments):
     if not attachments:
         return None
@@ -557,7 +589,7 @@ def chat_stream_service(
         messages = [
             {
                 "role": m.role,
-                "content": m.content
+                "content": get_message_text(m.content)
             }
             for m in history
         ]
@@ -826,7 +858,10 @@ def chat_stream_service(
         db,
         request.conversation_id,
         "assistant",
-        finish_content
+        build_assistant_message_content(
+            finish_content,
+            rag_sources
+        )
     )
 
     count = get_message_count(
