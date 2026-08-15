@@ -41,8 +41,11 @@ services:
       CHROMA_PATH: ${CHROMA_PATH:-/app/chroma}
       EMBEDDING_MODEL_NAME: ${EMBEDDING_MODEL_NAME:-/app/models/bge-small-zh}
       EMBEDDING_LOCAL_ONLY: ${EMBEDDING_LOCAL_ONLY:-true}
+      GENERATED_IMAGE_DIR: ${GENERATED_IMAGE_DIR:-/app/generated_images}
     volumes:
       - backend_uploads:/app/uploads
+      - chat_attachments:/app/chat_attachments
+      - generated_images:/app/generated_images
       - chroma_data:/app/chroma
       - hf_cache:/root/.cache/huggingface
       - ./models:/app/models
@@ -70,5 +73,7 @@ volumes:
   mysql_data:
   redis_data:
   backend_uploads:
+  chat_attachments:
+  generated_images:
   chroma_data:
   hf_cache:

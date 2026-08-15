@@ -55,11 +55,15 @@
 
 @media (max-width: 720px) {
     .content {
+        height: calc(100dvh - 54px);
         padding: 0;
     }
 
     .inputBar {
+        position: sticky;
+        bottom: 0;
         padding: 10px 10px max(12px, env(safe-area-inset-bottom));
+        border-top-color: rgba(255, 255, 255, 0.06);
     }
 
     .inputInner {

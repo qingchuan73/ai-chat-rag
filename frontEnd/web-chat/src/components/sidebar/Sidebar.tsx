@@ -19,6 +19,7 @@ interface SidebarProps {
     onOpenModelConfig: () => void;
     handleCreateConversation: () => void;
     handleSwitchConversation: (id: number) => void;
+    mobile?: boolean;
 }
 
 
@@ -30,17 +31,25 @@ function Sidebar({
     handleCreateConversation,
     conversations,
     handleSwitchConversation,
+    mobile = false,
 }: SidebarProps) {
     const normalHistory = [...conversations].sort((a, b) => b.id - a.id);
-    const displayHistory = collapsed ? normalHistory.slice(0, 5) : normalHistory;
+    const isCollapsed = mobile ? false : collapsed;
+    const displayHistory = isCollapsed ? normalHistory.slice(0, 5) : normalHistory;
 
     return (
-        <div className={`${styles.container} ${collapsed ? styles.collapsed : ""}`}>
+        <div className={`${styles.container} ${isCollapsed ? styles.collapsed : ""} ${mobile ? styles.mobile : ""}`}>
             <div className={styles.header}>
-                <span className={styles.logoText}>DeepSeek GPT</span>
-                <button className={styles.toggleBtn} onClick={onToggle}>
-                    {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                </button>
+                <span className={styles.logoText}>自定义AI助手</span>
+                {!mobile && (
+                    <button
+                        className={styles.toggleBtn}
+                        onClick={onToggle}
+                        aria-label={isCollapsed ? "展开侧边栏" : "收起侧边栏"}
+                    >
+                        {isCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                    </button>
+                )}
             </div>
 
             <div className={styles.actionArea}>

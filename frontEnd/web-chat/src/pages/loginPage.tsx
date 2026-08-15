@@ -52,7 +52,7 @@ function LoginPage() {
 
             <div className={styles.authCard}>
                 <div className={styles.header}>
-                    <div className={styles.logo}>DeepSeek GPT</div>
+                    <div className={styles.logo}>自定义AI助手</div>
                     <div className={styles.subtitle}>输入您的账号与密码进行登录</div> {/* 2. 修改提示词 */}
                 </div>
 

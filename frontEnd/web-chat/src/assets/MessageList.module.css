@@ -368,21 +368,25 @@
 
 @media (max-width: 720px) {
     .container {
-        padding: 24px 0;
+        padding: 18px 0 22px;
     }
 
     .listInner {
-        gap: 28px;
-        padding: 0 14px;
+        gap: 24px;
+        padding: 0 12px;
     }
 
     .userBubbleContainer {
-        max-width: 88%;
+        max-width: min(92%, 520px);
     }
 
     .userBubble {
-        padding: 9px 14px;
+        padding: 9px 13px;
         border-radius: 16px;
+    }
+
+    .userActions {
+        opacity: 1;
     }
 
     .userText {
@@ -391,7 +395,7 @@
     }
 
     .assistantContent {
-        padding-left: 14px;
+        padding-left: 12px;
     }
 
     .markdownWrapper {
@@ -414,6 +418,7 @@
 
     .markdownWrapper table {
         display: block;
+        max-width: calc(100vw - 42px);
         overflow-x: auto;
         white-space: nowrap;
     }
@@ -425,6 +430,29 @@
     .imageGeneratingFrame {
         width: 76px;
         height: 76px;
+    }
+
+    .imageGenerating {
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .generatedImageCard {
+        width: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+    .listInner {
+        padding: 0 10px;
+    }
+
+    .assistantContent {
+        padding-left: 10px;
+    }
+
+    .markdownWrapper {
+        font-size: 14px;
     }
 }
 

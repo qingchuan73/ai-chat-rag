@@ -3,7 +3,8 @@ import ChatArea from "../components/chatArea/chatArea";
 import KnowledgeBaseDrawer from "../components/knowledgeBase/KnowledgeBaseDrawer";
 import ModelConfigModal from "../components/settings/ModelConfigModal";
 import type { Conversation } from "../types/conversation";
-import { Layout } from "antd";
+import { Button, Drawer, Layout } from "antd";
+import { DatabaseOutlined, MenuOutlined, PlusOutlined, SettingOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getAllConversations } from "../api/chat";
@@ -21,6 +22,8 @@ function ChatPage() {
     const [modelConfigured, setModelConfigured] = useState(false);
     const [modelConfigReady, setModelConfigReady] = useState(false);
     const [username, setUsername] = useState(localStorage.getItem("username") || "");
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
     const navigate = useNavigate();
     const { conversationId } = useParams<{ conversationId: string }>();
     const activeConversationId = conversationId ? Number(conversationId) : null;
@@ -34,6 +37,15 @@ function ChatPage() {
 
         initConversation();
     }, [conversationId]);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(max-width: 720px)");
+        const updateIsMobile = () => setIsMobile(mediaQuery.matches);
+
+        updateIsMobile();
+        mediaQuery.addEventListener("change", updateIsMobile);
+        return () => mediaQuery.removeEventListener("change", updateIsMobile);
+    }, []);
 
     const refreshCurrentUser = async () => {
         try {
@@ -63,6 +75,7 @@ function ChatPage() {
 
     const switchConversation = (id: number) => {
         navigate(`/chat/${id}`);
+        setMobileMenuOpen(false);
     };
 
     const refreshConversations = async () => {
@@ -77,6 +90,7 @@ function ChatPage() {
 
     const handleCreateConversation = () => {
         navigate("/chat");
+        setMobileMenuOpen(false);
     };
 
     const handleConversationCreated = async (newId: number) => {
@@ -86,22 +100,58 @@ function ChatPage() {
 
     return (
         <Layout className={styles.page}>
-            <Sider
-                width={260}
-                collapsed={collapsed}
-                collapsedWidth={80}
-                className={styles.sider}
-            >
-                <Sidebar
-                    collapsed={collapsed}
-                    conversations={conversations}
-                    onToggle={() => setCollapsed(!collapsed)}
-                    onOpenKnowledgeBase={() => setKnowledgeOpen(true)}
-                    onOpenModelConfig={() => setModelConfigOpen(true)}
-                    handleCreateConversation={handleCreateConversation}
-                    handleSwitchConversation={switchConversation}
+            <div className={styles.mobileTopBar}>
+                <Button
+                    type="text"
+                    shape="circle"
+                    icon={<MenuOutlined />}
+                    onClick={() => setMobileMenuOpen(true)}
+                    aria-label="打开菜单"
                 />
-            </Sider>
+                <div className={styles.mobileTitle}>自定义AI助手</div>
+                <div className={styles.mobileActions}>
+                    <Button
+                        type="text"
+                        shape="circle"
+                        icon={<DatabaseOutlined />}
+                        onClick={() => setKnowledgeOpen(true)}
+                        aria-label="知识库"
+                    />
+                    <Button
+                        type="text"
+                        shape="circle"
+                        icon={<SettingOutlined />}
+                        onClick={() => setModelConfigOpen(true)}
+                        aria-label="系统设置"
+                    />
+                    <Button
+                        type="text"
+                        shape="circle"
+                        icon={<PlusOutlined />}
+                        onClick={handleCreateConversation}
+                        aria-label="新建对话"
+                    />
+                </div>
+            </div>
+
+            {!isMobile && (
+                <Sider
+                    width={260}
+                    collapsed={collapsed}
+                    collapsedWidth={80}
+                    className={styles.sider}
+                >
+                    <Sidebar
+                        collapsed={collapsed}
+                        conversations={conversations}
+                        onToggle={() => setCollapsed(!collapsed)}
+                        onOpenKnowledgeBase={() => setKnowledgeOpen(true)}
+                        onOpenModelConfig={() => setModelConfigOpen(true)}
+                        handleCreateConversation={handleCreateConversation}
+                        handleSwitchConversation={switchConversation}
+                    />
+                </Sider>
+            )}
 
             <ChatArea
                 conversationId={activeConversationId}
@@ -125,6 +175,36 @@ function ChatPage() {
                     refreshModelConfig();
                 }}
             />
+
+            <Drawer
+                open={mobileMenuOpen}
+                onClose={() => setMobileMenuOpen(false)}
+                placement="left"
+                width="min(86vw, 320px)"
+                closable={false}
+                className={styles.mobileDrawer}
+                styles={{
+                    body: { padding: 0 },
+                    content: { background: "#111113" }
+                }}
+            >
+                <Sidebar
+                    collapsed={false}
+                    mobile
+                    conversations={conversations}
+                    onToggle={() => undefined}
+                    onOpenKnowledgeBase={() => {
+                        setMobileMenuOpen(false);
+                        setKnowledgeOpen(true);
+                    }}
+                    onOpenModelConfig={() => {
+                        setMobileMenuOpen(false);
+                        setModelConfigOpen(true);
+                    }}
+                    handleCreateConversation={handleCreateConversation}
+                    handleSwitchConversation={switchConversation}
+                />
+            </Drawer>
         </Layout>
     );
 }
