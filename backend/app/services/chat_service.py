@@ -26,7 +26,7 @@ from crud.chat_attachment import get_user_chat_attachments_by_ids
 from services.summary_service import generate_summary
 from services.title_service import generate_title
 from services.llm_service import chat, generate_image, invoke
-from services.vector_service import search_bm25_vectors, search_vectors
+from services.vector_service import search_bm25_vectors, search_vectors, tokenize_text
 from services.queryRewrite_service import rewrite_query
 from services.ragRouter_service import (
     classify_rag_question_type,
@@ -42,6 +42,21 @@ from services.attachment_service import ATTACHMENT_DIR, IMAGE_EXTENSIONS
 RAG_LOOKUP_TOP_K = 6
 RAG_SYNTHESIS_TOP_K = 18
 RAG_SYNTHESIS_QUERY_TOP_K = 8
+RAG_PROBE_MIN_TOKEN_MATCHES = 2
+
+RAG_PROBE_STOP_WORDS = {
+    "什么",
+    "怎么",
+    "如何",
+    "为什么",
+    "哪些",
+    "是否",
+    "一下",
+    "这个",
+    "那个",
+    "当前",
+    "外号",
+}
 
 
 def get_message_text(content):
@@ -74,6 +89,33 @@ def build_assistant_message_content(content, sources=None):
         },
         ensure_ascii=False
     )
+
+
+def has_strong_bm25_probe_match(query, chunks):
+    if not chunks:
+        return False
+
+    query_tokens = {
+        token
+        for token in tokenize_text(query)
+        if len(token) >= 3 and token not in RAG_PROBE_STOP_WORDS
+    }
+
+    if not query_tokens:
+        return False
+
+    for chunk in chunks:
+        content = chunk.get("content") or ""
+        matched_count = sum(
+            1
+            for token in query_tokens
+            if token in content
+        )
+
+        if matched_count >= RAG_PROBE_MIN_TOKEN_MATCHES:
+            return True
+
+    return False
 
 
 def build_image_attachment_content(db, user_id, question, attachments):
@@ -705,7 +747,13 @@ def chat_stream_service(
             user_id=user_id,
             top_k=4
         )
-        use_knowledge = bool(bm25_probe_chunks)
+        use_knowledge = has_strong_bm25_probe_match(
+            rewritten_query,
+            bm25_probe_chunks
+        )
+
+        if not use_knowledge:
+            bm25_probe_chunks = []
 
     if use_knowledge:
         rag_question_type = classify_rag_question_type(
