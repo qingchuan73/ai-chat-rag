@@ -94,6 +94,36 @@
     }
 }
 
+@media (max-width: 520px) {
+    .splitContainer {
+        min-height: 100dvh;
+        height: 100dvh;
+    }
+
+    .leftSection {
+        padding: 18px;
+    }
+
+    .authCard {
+        max-width: 100%;
+        padding: 28px 22px;
+        border-radius: 12px;
+    }
+
+    .header {
+        margin-bottom: 24px;
+    }
+
+    .logo {
+        font-size: 22px;
+    }
+
+    .oauthGroup {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
 
 .authCard {
     width: 100%;

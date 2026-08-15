@@ -3,6 +3,7 @@ import { Button, Input, Spin, message as antdMessage } from "antd";
 import { LoadingOutlined, PaperClipOutlined, SendOutlined } from "@ant-design/icons";
 import styles from "../../assets/ChatInput.module.css";
 import { uploadFile } from "../../api/file";
+import { uploadAttachment } from "../../api/attachment";
 import AttachmentChip from "./AttachmentChip";
 import type { AttachmentItem } from "../../types/message";
 
@@ -25,7 +26,20 @@ const ALLOWED_EXTENSIONS = new Set([
     "rtf",
     "html",
     "htm",
-    "rst"
+    "rst",
+    "png",
+    "jpg",
+    "jpeg",
+    "webp",
+    "gif"
+]);
+
+const IMAGE_EXTENSIONS = new Set([
+    "png",
+    "jpg",
+    "jpeg",
+    "webp",
+    "gif"
 ]);
 
 interface ChatInputProps {
@@ -81,6 +95,11 @@ function ChatInput({
         return ALLOWED_EXTENSIONS.has(ext);
     };
 
+    const isImageFile = (file: File) => {
+        const ext = file.name.split(".").pop()?.toLowerCase() || "";
+        return IMAGE_EXTENSIONS.has(ext);
+    };
+
     const isDuplicateInInput = (file: File) => {
         return attachments.some(item => item.originalName === file.name)
             || uploadingFiles.includes(file.name);
@@ -95,7 +114,7 @@ function ChatInput({
         }
 
         if (!isAllowedFile(file)) {
-            antdMessage.warning("只允许上传常见文本、PDF、Word 等文档");
+                antdMessage.warning("只允许上传常见文本、PDF、Word 和图片文件");
             return;
         }
 
@@ -107,7 +126,9 @@ function ChatInput({
         setUploadingFiles(prev => [...prev, file.name]);
 
         try {
-            const result: any = await uploadFile(file);
+            const result: any = isImageFile(file)
+                ? await uploadAttachment(file)
+                : await uploadFile(file);
             setAttachments(prev => [
                 ...prev,
                 {
@@ -219,7 +240,7 @@ function ChatInput({
                             <input
                                 type="file"
                                 multiple
-                                accept=".txt,.md,.markdown,.csv,.tsv,.log,.json,.yaml,.yml,.xml,.pdf,.doc,.docx,.rtf,.html,.htm,.rst"
+                                accept=".txt,.md,.markdown,.csv,.tsv,.log,.json,.yaml,.yml,.xml,.pdf,.doc,.docx,.rtf,.html,.htm,.rst,.png,.jpg,.jpeg,.webp,.gif"
                                 className={styles.fileInput}
                                 disabled={disabled}
                                 onChange={(e) => {

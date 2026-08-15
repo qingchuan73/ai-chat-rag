@@ -106,3 +106,44 @@ body {
 .empty-chat-config-btn:hover {
     background: #323238;
 }
+
+@media (max-width: 720px) {
+    html,
+    body,
+    #root {
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .ant-modal-root .ant-modal {
+        max-width: calc(100vw - 24px) !important;
+        margin: 12px auto !important;
+    }
+
+    .ant-modal-root .ant-modal-header {
+        padding: 22px 20px 16px !important;
+    }
+
+    .ant-modal-root .ant-modal-body {
+        padding: 0 20px 16px !important;
+    }
+
+    .ant-modal-root .ant-modal-footer {
+        padding: 14px 20px 20px !important;
+    }
+
+    .empty-chat-shell {
+        padding: 18px 10px;
+    }
+
+    .empty-chat-center {
+        width: 100%;
+        transform: translateY(-4vh);
+    }
+
+    .empty-chat-title {
+        margin-bottom: 22px;
+        font-size: 24px;
+    }
+}

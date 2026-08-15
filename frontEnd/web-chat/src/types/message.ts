@@ -2,8 +2,15 @@ export interface Message {
     role:'user'|'assistant',    
     content:string,
     isLoading?: boolean,
+    loadingType?: "text" | "image",
+    image?: GeneratedImage,
     sources?: MessageSource[],
     attachments?: AttachmentItem[]
+}
+
+export interface GeneratedImage {
+    url: string;
+    prompt?: string;
 }
 
 export interface MessageSource {

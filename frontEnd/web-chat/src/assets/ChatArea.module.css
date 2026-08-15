@@ -1,0 +1,72 @@
+.layout {
+    height: 100%;
+    width: 100%;
+    min-width: 0;
+    background: #18181b;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    max-width: 880px;
+    min-width: 0;
+    margin: 0 auto;
+    padding: 0 16px;
+    background: #18181b;
+    box-sizing: border-box;
+}
+
+.anchorWrapper {
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    z-index: 100;
+    max-height: 60vh;
+    overflow-y: auto;
+    transform: translateY(-50%);
+}
+
+.messagePanel {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    background: #18181b;
+}
+
+.inputBar {
+    width: 100%;
+    padding: 16px 0 24px;
+    background: #18181b;
+    border-top: 1px solid rgba(255, 255, 255, 0.02);
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.inputInner {
+    width: 100%;
+    max-width: 880px;
+    padding: 0 24px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 720px) {
+    .content {
+        padding: 0;
+    }
+
+    .inputBar {
+        padding: 10px 10px max(12px, env(safe-area-inset-bottom));
+    }
+
+    .inputInner {
+        padding: 0;
+    }
+
+    .anchorWrapper {
+        display: none;
+    }
+}

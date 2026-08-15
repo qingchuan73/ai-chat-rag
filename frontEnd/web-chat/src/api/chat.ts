@@ -1,6 +1,6 @@
 import request from "./request";
 import { API_BASE_URL } from "./config";
-import type { MessageSource, standardM } from "../types/message";
+import type { GeneratedImage, MessageSource, standardM } from "../types/message";
 
 
 export function getStart() {
@@ -28,7 +28,7 @@ export async function createConversation() {
 
 export async function sendMessage(
     message: standardM,
-    onChunk: (chunk: { content?: string; sources?: MessageSource[] }) => void
+    onChunk: (chunk: { content?: string; sources?: MessageSource[]; type?: string; image?: GeneratedImage }) => void
 ) {
     const token = localStorage.getItem("token");
 

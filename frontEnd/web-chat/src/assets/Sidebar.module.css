@@ -241,3 +241,37 @@
 .collapsed .footer {
     padding-top: 12px;
 }
+
+@media (max-width: 720px) {
+    .container {
+        padding: 14px 6px;
+    }
+
+    .collapsed {
+        padding: 14px 6px;
+    }
+
+    .header {
+        height: 34px;
+        margin-bottom: 18px;
+    }
+
+    .toggleBtn,
+    .collapsed .newChatBtn,
+    .collapsed .menuItem {
+        width: 36px;
+        height: 36px;
+    }
+
+    .actionArea {
+        margin-bottom: 18px;
+    }
+
+    .menuList {
+        margin-bottom: 14px;
+    }
+
+    .footer {
+        padding-top: 10px;
+    }
+}

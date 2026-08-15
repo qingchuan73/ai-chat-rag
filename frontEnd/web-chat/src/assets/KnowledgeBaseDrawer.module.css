@@ -188,3 +188,35 @@
     border-radius: 8px;
     background: #202024;
 }
+
+@media (max-width: 720px) {
+    .drawer :global(.ant-drawer-body) {
+        padding: 18px 14px !important;
+    }
+
+    .header {
+        margin-bottom: 16px;
+    }
+
+    .table :global(.ant-table) {
+        font-size: 13px;
+    }
+
+    .table :global(.ant-table-container) {
+        overflow-x: auto;
+    }
+
+    .monitorHeader {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 22px;
+    }
+
+    .traceTop {
+        flex-wrap: wrap;
+    }
+
+    .traceSources span {
+        max-width: 100%;
+    }
+}

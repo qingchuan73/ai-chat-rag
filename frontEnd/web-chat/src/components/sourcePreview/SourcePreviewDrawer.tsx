@@ -68,7 +68,7 @@ function SourcePreviewDrawer({ source, open, onClose }: SourcePreviewDrawerProps
         <Drawer
             className={styles.drawer}
             placement="right"
-            size="large"
+            width="min(100vw, 820px)"
             open={open}
             onClose={onClose}
             title={source && (

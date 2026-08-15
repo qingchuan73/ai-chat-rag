@@ -196,3 +196,38 @@
 .sendBtn:active {
     transform: scale(0.95);
 }
+
+@media (max-width: 720px) {
+    .inputBox {
+        gap: 8px;
+        border-radius: 18px;
+        padding: 9px 10px 10px;
+    }
+
+    .inputRow {
+        gap: 8px;
+    }
+
+    .textarea {
+        font-size: 14px;
+    }
+
+    .actionGroup {
+        gap: 8px;
+    }
+
+    .attachBtn {
+        width: 34px;
+        height: 34px;
+    }
+
+    .attachmentName {
+        max-width: 180px;
+    }
+}
+
+@media (max-width: 420px) {
+    .attachmentName {
+        max-width: 130px;
+    }
+}

@@ -1,3 +1,5 @@
+import json
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database.database import get_db
@@ -15,6 +17,32 @@ router = APIRouter(
     prefix="/conversation",
     tags=["conversation"]
 )
+
+
+def serialize_message_content(message):
+    base = {
+        "id": message.id,
+        "role": message.role,
+        "content": message.content,
+        "created_at": message.created_at,
+    }
+
+    if message.role != "assistant":
+        return base
+
+    try:
+        payload = json.loads(message.content)
+    except Exception:
+        return base
+
+    if isinstance(payload, dict) and payload.get("type") == "image":
+        base["content"] = payload.get("prompt") or ""
+        base["image"] = {
+            "url": payload.get("url"),
+            "prompt": payload.get("prompt") or ""
+        }
+
+    return base
 
 @router.post("")
 def new_conversation(
@@ -97,12 +125,7 @@ def messages(
     
     return {
         "messages":[
-            {
-                "id": m.id,
-                "role": m.role,
-                "content": m.content,
-                "created_at": m.created_at
-            }
+            serialize_message_content(m)
             for m in result
         ]
     }

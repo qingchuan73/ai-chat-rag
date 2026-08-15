@@ -55,3 +55,26 @@
     border-radius: 8px;
     background: #111113;
 }
+
+@media (max-width: 720px) {
+    .drawer :global(.ant-drawer-body) {
+        padding: 12px !important;
+    }
+
+    .fileName {
+        font-size: 14px;
+    }
+
+    .body {
+        min-height: calc(100dvh - 92px);
+    }
+
+    .frame {
+        height: calc(100dvh - 104px);
+        border-radius: 6px;
+    }
+
+    .unsupported {
+        min-height: calc(100dvh - 140px);
+    }
+}

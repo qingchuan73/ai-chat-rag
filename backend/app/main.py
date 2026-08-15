@@ -5,18 +5,22 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from api.chat import router
 from api.file import router as file_router
+from api.attachment import router as attachment_router
 
 from fastapi.middleware.cors import CORSMiddleware
 from api.conversation import router as conversation_router
 from api.auth import router as auth_router
 from api.settings import router as settings_router
 from api.rag_trace import router as rag_trace_router
+from services.image_storage_service import GENERATED_IMAGE_DIR
 
 
 
 app = FastAPI()
+os.makedirs(GENERATED_IMAGE_DIR, exist_ok=True)
 
 default_origins = [
     "http://localhost:5173",
@@ -43,8 +47,14 @@ app.include_router(router, prefix="/api")
 app.include_router(conversation_router, prefix="/api")
 app.include_router(auth_router,prefix="/api")
 app.include_router(file_router,prefix="/api")
+app.include_router(attachment_router,prefix="/api")
 app.include_router(settings_router,prefix="/api")
 app.include_router(rag_trace_router,prefix="/api")
+app.mount(
+    "/api/generated-images",
+    StaticFiles(directory=GENERATED_IMAGE_DIR),
+    name="generated_images"
+)
 @app.get("/")
 def read_root():
     return {

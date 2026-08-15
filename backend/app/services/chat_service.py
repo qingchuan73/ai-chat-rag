@@ -1,4 +1,6 @@
+﻿import base64
 import json
+import mimetypes
 
 from fastapi import HTTPException
 
@@ -20,9 +22,10 @@ from crud.conversation import (
     get_user_conversation
 )
 from crud.file import get_user_knowledge_files_by_ids
+from crud.chat_attachment import get_user_chat_attachments_by_ids
 from services.summary_service import generate_summary
 from services.title_service import generate_title
-from services.llm_service import chat
+from services.llm_service import chat, generate_image, invoke
 from services.vector_service import search_bm25_vectors, search_vectors
 from services.queryRewrite_service import rewrite_query
 from services.ragRouter_service import (
@@ -32,11 +35,91 @@ from services.ragRouter_service import (
     should_use_knowledge
 )
 from services.model_config_service import get_runtime_model_config
+from services.image_storage_service import save_generated_image
+from services.attachment_service import ATTACHMENT_DIR, IMAGE_EXTENSIONS
 
 
 RAG_LOOKUP_TOP_K = 6
 RAG_SYNTHESIS_TOP_K = 18
 RAG_SYNTHESIS_QUERY_TOP_K = 8
+
+
+def build_image_attachment_content(db, user_id, question, attachments):
+    if not attachments:
+        return None
+
+    file_ids = [
+        item.fileId
+        for item in attachments
+        if getattr(item, "fileId", None)
+    ]
+    files = get_user_chat_attachments_by_ids(
+        db,
+        user_id,
+        file_ids
+    )
+    image_files = [
+        item
+        for item in files
+        if item.file_type in IMAGE_EXTENSIONS and item.storage_filename
+    ]
+
+    if not image_files:
+        return None
+
+    content = [
+        {
+            "type": "text",
+            "text": question or "请分析这张图片。"
+        }
+    ]
+
+    for image_file in image_files:
+        file_path = ATTACHMENT_DIR / image_file.storage_filename
+        if not file_path.exists():
+            continue
+
+        mime_type = mimetypes.guess_type(str(file_path))[0] or "image/png"
+        encoded = base64.b64encode(file_path.read_bytes()).decode("utf-8")
+        content.append(
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:{mime_type};base64,{encoded}"
+                }
+            }
+        )
+
+    return content if len(content) > 1 else None
+
+
+def should_generate_image(question, model_config):
+    prompt = [
+        {
+            "role": "system",
+            "content": """
+            浣犳槸璇锋眰璺敱鍣紝鍙垽鏂敤鎴峰綋鍓嶈姹傛槸鍚﹂渶瑕佺敓鎴愬浘鐗囥€?
+            鍒ゆ柇涓?image 鐨勬儏鍐碉細
+            - 鐢ㄦ埛鏄庣‘瑕佹眰鐢诲浘銆佺敓鎴愬浘鐗囥€佺敓鎴愭捣鎶ャ€佺敓鎴愭彃鐢汇€佺敓鎴愬ご鍍忋€佺敓鎴愬皝闈€佺敓鎴?logo銆佺敓鎴愬绾哥瓑瑙嗚鍐呭銆?
+            鍒ゆ柇涓?chat 鐨勬儏鍐碉細
+            - 鐢ㄦ埛鍙槸闂棶棰樸€佸垎鏋愬浘鐗囪兘鍔涖€佽浣犺В閲婂浘鐗囩敓鎴愬師鐞嗐€佽浣犲啓鎻愮ず璇嶃€佷慨鏀逛唬鐮併€佹櫘閫氳亰澶┿€?
+            鍙緭鍑?image 鎴?chat銆?            """
+        },
+        {
+            "role": "user",
+            "content": question
+        }
+    ]
+
+    try:
+        result = invoke(
+            messages=prompt,
+            model_config=model_config
+        )
+        return result.content.strip().lower().startswith("image")
+    except Exception:
+        return False
+
 
 def save_user_message(
     db,
@@ -250,24 +333,24 @@ def build_rag_context(
 
 def get_rag_answer_format_prompt():
     return """
-    回答必须使用 Markdown，并严格按以下结构组织：
+    鍥炵瓟蹇呴』浣跨敤 Markdown锛屽苟涓ユ牸鎸変互涓嬬粨鏋勭粍缁囷細
 
-    一、结论
-    用 1-2 句话直接回答用户问题。
+    涓€銆佺粨璁?
+    鐢?1-2 鍙ヨ瘽鐩存帴鍥炵瓟鐢ㄦ埛闂銆?
 
-    二、依据
-    列出你实际使用的关键资料依据，并标明页码。
-    如果没有页码，说明“当前资料未提供页码”。
+    浜屻€佷緷鎹?
+    鍒楀嚭浣犲疄闄呬娇鐢ㄧ殑鍏抽敭璧勬枡渚濇嵁锛屽苟鏍囨槑椤电爜銆?
+    濡傛灉娌℃湁椤电爜锛岃鏄庘€滃綋鍓嶈祫鏂欐湭鎻愪緵椤电爜鈥濄€?
 
-    三、展开说明
-    按主题分点说明，不要堆砌原文，不要把无关片段硬塞进答案。
+    涓夈€佸睍寮€璇存槑
+    鎸変富棰樺垎鐐硅鏄庯紝涓嶈鍫嗙爩鍘熸枃锛屼笉瑕佹妸鏃犲叧鐗囨纭杩涚瓟妗堛€?
 
-    四、不确定性
-    如果资料不足、证据不完整或只能做归纳，请明确说明。
-    不要编造文档中没有的内容、页码、章节或来源。
+    鍥涖€佷笉纭畾鎬?
+    濡傛灉璧勬枡涓嶈冻銆佽瘉鎹笉瀹屾暣鎴栧彧鑳藉仛褰掔撼锛岃鏄庣‘璇存槑銆?
+    涓嶈缂栭€犳枃妗ｄ腑娌℃湁鐨勫唴瀹广€侀〉鐮併€佺珷鑺傛垨鏉ユ簮銆?
 
-    五、可继续追问
-    给出 2-3 个用户可以继续追问的方向。
+    浜斻€佸彲缁х画杩介棶
+    缁欏嚭 2-3 涓敤鎴峰彲浠ョ户缁拷闂殑鏂瑰悜銆?
     """
 
 
@@ -280,55 +363,55 @@ def build_rag_system_prompt(
 
     if question_type == "synthesis":
         return f"""
-        以下知识库上下文与最新用户问题相关。
-        你必须只基于这些上下文回答。
+        浠ヤ笅鐭ヨ瘑搴撲笂涓嬫枃涓庢渶鏂扮敤鎴烽棶棰樼浉鍏炽€?
+        浣犲繀椤诲彧鍩轰簬杩欎簺涓婁笅鏂囧洖绛斻€?
 
-        用户当前需要文档级或主题级综合回答。
-        请跨页面阅读上下文，把相关证据整合成结构化答案。
-        如果多个切片分别描述同一主题的不同侧面，不要只依据单个切片回答。
+        鐢ㄦ埛褰撳墠闇€瑕佹枃妗ｇ骇鎴栦富棰樼骇缁煎悎鍥炵瓟銆?
+        璇疯法椤甸潰闃呰涓婁笅鏂囷紝鎶婄浉鍏宠瘉鎹暣鍚堟垚缁撴瀯鍖栫瓟妗堛€?
+        濡傛灉澶氫釜鍒囩墖鍒嗗埆鎻忚堪鍚屼竴涓婚鐨勪笉鍚屼晶闈紝涓嶈鍙緷鎹崟涓垏鐗囧洖绛斻€?
 
-        回答要求：
-        1. 只回答最新用户问题。
-        2. 在上下文支持时，按清晰主题组织答案。
-        3. 保留日期、阈值、价格档位、必选/推荐要求、技术名称、页码等具体事实。
-        4. 区分“文档明确表述”和“基于文档证据的归纳”。
-        5. 除非问题直接询问，否则忽略封面、目录、附录和版本记录。
-        6. 如果用户使用的原词没有出现在文档中，但上下文有相邻证据，
-           请基于证据归纳最接近的答案，不要直接停在“上下文没有明确说明”。
-        7. 如果上下文确实不足，请具体说明缺少什么。
-        8. 不要把检索片段当成孤立事实，要连接描述同一战略或目标的相关页面。
-        9. 使用事实时，如果有页码，请在回答中标明来源页。
-        10. 不要编造来源、页码、章节或引用。
+        鍥炵瓟瑕佹眰锛?
+        1. 鍙洖绛旀渶鏂扮敤鎴烽棶棰樸€?
+        2. 鍦ㄤ笂涓嬫枃鏀寔鏃讹紝鎸夋竻鏅颁富棰樼粍缁囩瓟妗堛€?
+        3. 淇濈暀鏃ユ湡銆侀槇鍊笺€佷环鏍兼。浣嶃€佸繀閫?鎺ㄨ崘瑕佹眰銆佹妧鏈悕绉般€侀〉鐮佺瓑鍏蜂綋浜嬪疄銆?
+        4. 鍖哄垎鈥滄枃妗ｆ槑纭〃杩扳€濆拰鈥滃熀浜庢枃妗ｈ瘉鎹殑褰掔撼鈥濄€?
+        5. 闄ら潪闂鐩存帴璇㈤棶锛屽惁鍒欏拷鐣ュ皝闈€佺洰褰曘€侀檮褰曞拰鐗堟湰璁板綍銆?
+        6. 濡傛灉鐢ㄦ埛浣跨敤鐨勫師璇嶆病鏈夊嚭鐜板湪鏂囨。涓紝浣嗕笂涓嬫枃鏈夌浉閭昏瘉鎹紝
+           璇峰熀浜庤瘉鎹綊绾虫渶鎺ヨ繎鐨勭瓟妗堬紝涓嶈鐩存帴鍋滃湪鈥滀笂涓嬫枃娌℃湁鏄庣‘璇存槑鈥濄€?
+        7. 濡傛灉涓婁笅鏂囩‘瀹炰笉瓒筹紝璇峰叿浣撹鏄庣己灏戜粈涔堛€?
+        8. 涓嶈鎶婃绱㈢墖娈靛綋鎴愬绔嬩簨瀹烇紝瑕佽繛鎺ユ弿杩板悓涓€鎴樼暐鎴栫洰鏍囩殑鐩稿叧椤甸潰銆?
+        9. 浣跨敤浜嬪疄鏃讹紝濡傛灉鏈夐〉鐮侊紝璇峰湪鍥炵瓟涓爣鏄庢潵婧愰〉銆?
+        10. 涓嶈缂栭€犳潵婧愩€侀〉鐮併€佺珷鑺傛垨寮曠敤銆?
 
         {answer_format}
 
-        改写后的检索问题：
+        鏀瑰啓鍚庣殑妫€绱㈤棶棰橈細
         {rewritten_query}
 
-        知识库上下文：
+        鐭ヨ瘑搴撲笂涓嬫枃锛?
         {rag_context}
         """
 
     return f"""
-    以下知识库上下文可能与当前问题相关。
-    当前请求已被路由到知识库，因此你必须只基于这些上下文回答。
+    浠ヤ笅鐭ヨ瘑搴撲笂涓嬫枃鍙兘涓庡綋鍓嶉棶棰樼浉鍏炽€?
+    褰撳墠璇锋眰宸茶璺敱鍒扮煡璇嗗簱锛屽洜姝や綘蹇呴』鍙熀浜庤繖浜涗笂涓嬫枃鍥炵瓟銆?
 
-    如果上下文没有足够证据回答用户问题，请说明当前知识库上下文没有提供答案。
-    不要使用外部知识。
+    濡傛灉涓婁笅鏂囨病鏈夎冻澶熻瘉鎹洖绛旂敤鎴烽棶棰橈紝璇疯鏄庡綋鍓嶇煡璇嗗簱涓婁笅鏂囨病鏈夋彁渚涚瓟妗堛€?
+    涓嶈浣跨敤澶栭儴鐭ヨ瘑銆?
 
-    如果用户询问来源、引用、原文、页码、章节或答案出处，
-    只能使用上下文中提供的信息。
-    如果上下文没有提供这些元信息，请说明当前知识库上下文未提供。
-    不要编造来源、页码、章节或引用。
+    濡傛灉鐢ㄦ埛璇㈤棶鏉ユ簮銆佸紩鐢ㄣ€佸師鏂囥€侀〉鐮併€佺珷鑺傛垨绛旀鍑哄锛?
+    鍙兘浣跨敤涓婁笅鏂囦腑鎻愪緵鐨勪俊鎭€?
+    濡傛灉涓婁笅鏂囨病鏈夋彁渚涜繖浜涘厓淇℃伅锛岃璇存槑褰撳墠鐭ヨ瘑搴撲笂涓嬫枃鏈彁渚涖€?
+    涓嶈缂栭€犳潵婧愩€侀〉鐮併€佺珷鑺傛垨寮曠敤銆?
 
-    使用上下文事实时，如果有页码，请在回答中标明来源页。
+    浣跨敤涓婁笅鏂囦簨瀹炴椂锛屽鏋滄湁椤电爜锛岃鍦ㄥ洖绛斾腑鏍囨槑鏉ユ簮椤点€?
 
     {answer_format}
 
-    改写后的检索问题：
+    鏀瑰啓鍚庣殑妫€绱㈤棶棰橈細
     {rewritten_query}
 
-    知识库上下文：
+    鐭ヨ瘑搴撲笂涓嬫枃锛?
     {rag_context}
     """
 
@@ -338,12 +421,12 @@ def build_llm_messages(
     use_history
 ):
     system_prompt = f"""
-    只回答最新用户问题。
+    鍙洖绛旀渶鏂扮敤鎴烽棶棰樸€?
 
-    最新用户问题：
+    鏈€鏂扮敤鎴烽棶棰橈細
     {latest_question}
 
-    除非最新用户问题明确要求，否则不要回答、总结、纠正、继续或复盘更早的问题。
+    闄ら潪鏈€鏂扮敤鎴烽棶棰樻槑纭姹傦紝鍚﹀垯涓嶈鍥炵瓟銆佹€荤粨銆佺籂姝ｃ€佺户缁垨澶嶇洏鏇存棭鐨勯棶棰樸€?
     """
 
     if use_history:
@@ -391,6 +474,67 @@ def chat_stream_service(
             status_code=404,
             detail="Conversation not found"
         )
+
+    if should_generate_image(request.content, model_config):
+        create_message(
+            db,
+            conversation_id,
+            "user",
+            request.content
+        )
+
+        yield f"data: {json.dumps({'type': 'image_start'}, ensure_ascii=False)}\n\n"
+
+        if not model_config.get("image_model"):
+            error_message = "图片生成失败：请先在系统设置中为当前模型配置生图模型。"
+            create_message(
+                db,
+                conversation_id,
+                "assistant",
+                error_message
+            )
+            yield f"data: {json.dumps({'content': error_message}, ensure_ascii=False)}\n\n"
+            return
+
+        try:
+            raw_image_url = generate_image(
+                request.content,
+                model_config
+            )
+            image_url = save_generated_image(raw_image_url)
+        except Exception as error:
+            error_detail = str(error)
+            if len(error_detail) > 300:
+                error_detail = f"{error_detail[:300]}..."
+            error_message = (
+                "图片生成失败：当前模型不能用于图片生成。"
+                "请检查生图模型是否支持 images/generations。"
+                f"\n\n错误详情：{error_detail}"
+            )
+            create_message(
+                db,
+                conversation_id,
+                "assistant",
+                error_message
+            )
+            yield f"data: {json.dumps({'content': error_message}, ensure_ascii=False)}\n\n"
+            return
+
+        image_message = {
+            "type": "image",
+            "url": image_url,
+            "prompt": request.content
+        }
+
+        create_message(
+            db,
+            conversation_id,
+            "assistant",
+            json.dumps(image_message, ensure_ascii=False)
+        )
+
+        yield f"data: {json.dumps({'type': 'image', 'image': image_message}, ensure_ascii=False)}\n\n"
+        return
 
     messages = get_context(
         user_id,
@@ -449,6 +593,55 @@ def chat_stream_service(
         conversation_id,
         messages
     )
+
+    image_content = build_image_attachment_content(
+        db,
+        user_id,
+        request.content,
+        getattr(request, "attachments", None)
+    )
+
+    if image_content:
+        llm_messages = build_llm_messages(
+            messages=messages,
+            latest_question=request.content,
+            use_history=True
+        )
+
+        for message in reversed(llm_messages):
+            if message["role"] == "user":
+                message["content"] = image_content
+                break
+        ai_content = []
+
+        try:
+            for chunk in chat(llm_messages, model_config):
+                ai_content.append(chunk)
+                yield f"data: {json.dumps({'content': chunk})}\n\n"
+        except Exception:
+            error_message = "识图失败：当前模型可能不支持图片输入，请切换到支持多模态视觉的聊天模型。"
+            ai_content = [error_message]
+            yield f"data: {json.dumps({'content': error_message}, ensure_ascii=False)}\n\n"
+
+        finish_content = "".join(ai_content)
+        messages.append(
+            {
+                "role": "assistant",
+                "content": finish_content
+            }
+        )
+        save_context(
+            user_id,
+            conversation_id,
+            messages
+        )
+        create_message(
+            db,
+            request.conversation_id,
+            "assistant",
+            finish_content
+        )
+        return
 
     history_for_rewrite = [
         m for m in messages[:-1][-6:]
@@ -560,10 +753,18 @@ def chat_stream_service(
     if rag_sources:
         yield f"data: {json.dumps({'sources': rag_sources})}\n\n"
 
-    for chunk in chat(llm_messages, model_config):
-        ai_content.append(chunk)
+    try:
+        for chunk in chat(llm_messages, model_config):
+            ai_content.append(chunk)
 
-        yield f"data: {json.dumps({'content': chunk})}\n\n"
+            yield f"data: {json.dumps({'content': chunk})}\n\n"
+    except Exception:
+        error_message = (
+            "模型调用失败：当前模型不支持本次请求使用的接口。"
+            "如果这是聊天问题，请切换到聊天模型；如果是图片生成，请切换到支持 images/generations 的图片模型。"
+        )
+        ai_content = [error_message]
+        yield f"data: {json.dumps({'content': error_message}, ensure_ascii=False)}\n\n"
 
     finish_content = "".join(ai_content)
 
@@ -585,17 +786,20 @@ def chat_stream_service(
             conversation_id
         )
 
-        summary = generate_summary(
-            old_messages,
-            old_summary,
-            model_config=model_config
-        )
+        try:
+            summary = generate_summary(
+                old_messages,
+                old_summary,
+                model_config=model_config
+            )
 
-        update_summary(
-            db,
-            conversation_id,
-            summary
-        )
+            update_summary(
+                db,
+                conversation_id,
+                summary
+            )
+        except Exception:
+            summary = old_summary or ""
 
         messages = messages[-20:]
 
@@ -631,13 +835,16 @@ def chat_stream_service(
     )
 
     if count == 2:
-        title = generate_title(
-            request.content,
-            model_config=model_config
-        )
+        try:
+            title = generate_title(
+                request.content,
+                model_config=model_config
+            )
 
-        update_title(
-            db,
-            conversation_id,
-            title
-        )
+            update_title(
+                db,
+                conversation_id,
+                title
+            )
+        except Exception:
+            pass

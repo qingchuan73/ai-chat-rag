@@ -128,8 +128,8 @@ function KnowledgeBaseDrawer({ open, onClose }: KnowledgeBaseDrawerProps) {
             key: "status",
             width: 110,
             render: (status: string) => (
-                <Tag color={status === "indexed" ? "green" : "red"}>
-                    {status === "indexed" ? "已索引" : "文件缺失"}
+                <Tag color={status === "indexed" ? "green" : status === "uploaded" ? "blue" : "red"}>
+                    {status === "indexed" ? "已索引" : status === "uploaded" ? "已上传" : "文件缺失"}
                 </Tag>
             )
         },
@@ -163,7 +163,7 @@ function KnowledgeBaseDrawer({ open, onClose }: KnowledgeBaseDrawerProps) {
         <Drawer
             title={null}
             placement="right"
-            size="large"
+            width="min(100vw, 760px)"
             open={open}
             onClose={onClose}
             className={styles.drawer}

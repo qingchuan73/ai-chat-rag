@@ -1,4 +1,4 @@
-/* 极简木炭灰滚动容器 */
+﻿/* 鏋佺畝鏈ㄧ偔鐏版粴鍔ㄥ鍣?*/
 .container {
     width: 100%;
     height: 100%;
@@ -6,10 +6,10 @@
     background-color: #18181b; 
     padding: 40px 0;
     box-sizing: border-box;
-    scroll-behavior: auto; /* 平滑滚动以适配锚点点击 */
+    scroll-behavior: auto; /* 骞虫粦婊氬姩浠ラ€傞厤閿氱偣鐐瑰嚮 */
 }
 
-/* 滚动条 */
+/* 婊氬姩鏉?*/
 .container::-webkit-scrollbar { width: 8px; }
 .container::-webkit-scrollbar-track { background: transparent; }
 .container::-webkit-scrollbar-thumb {
@@ -23,7 +23,7 @@
     background-clip: padding-box;
 }
 
-/* 内部列表 */
+/* 鍐呴儴鍒楄〃 */
 .listInner {
     max-width: 840px; 
     margin: 0 auto;   
@@ -44,7 +44,7 @@
 .assistantRow { justify-content: flex-start; }
 
 /* ==========================================================================
-   用户提问容器 & 悬停操作工具栏
+   鐢ㄦ埛鎻愰棶瀹瑰櫒 & 鎮仠鎿嶄綔宸ュ叿鏍?
    ========================================================================== */
 .userBubbleContainer {
     display: flex;
@@ -105,8 +105,8 @@
 }
 
 /* 
-   精致的悬停操作栏：
-   静止时隐藏，鼠标悬停到用户气泡容器时，优雅地淡入显现 
+   绮捐嚧鐨勬偓鍋滄搷浣滄爮锛?
+   闈欐鏃堕殣钘忥紝榧犳爣鎮仠鍒扮敤鎴锋皵娉″鍣ㄦ椂锛屼紭闆呭湴娣″叆鏄剧幇 
 */
 .userActions {
     display: flex;
@@ -136,7 +136,7 @@
 }
 
 /* ==========================================================================
-   内嵌编辑面板（TextArea 与保存/取消按钮排版）
+   鍐呭祵缂栬緫闈㈡澘锛圱extArea 涓庝繚瀛?鍙栨秷鎸夐挳鎺掔増锛?
    ========================================================================== */
 .editWrapper {
     display: flex;
@@ -175,21 +175,21 @@
 }
 
 .saveBtn {
-    color: #34d399; /* 绿色勾 */
+    color: #34d399; /* 缁胯壊鍕?*/
 }
 .saveBtn:hover {
     background-color: rgba(52, 211, 153, 0.08);
 }
 
 .cancelBtn {
-    color: #f87171; /* 红色叉 */
+    color: #f87171; /* 绾㈣壊鍙?*/
 }
 .cancelBtn:hover {
     background-color: rgba(248, 113, 113, 0.08);
 }
 
 /* ==========================================================================
-   AI 内容及 Markdown 排版
+   AI 鍐呭鍙?Markdown 鎺掔増
    ========================================================================== */
 .assistantContent {
     width: 100%;
@@ -211,7 +211,7 @@
     line-height: 1.8;
 }
 
-/* 剩下的 Markdown 基础标记排版保持原样不变 */
+/* 鍓╀笅鐨?Markdown 鍩虹鏍囪鎺掔増淇濇寔鍘熸牱涓嶅彉 */
 .markdownWrapper > *:first-child { margin-top: 0; }
 .markdownWrapper > *:last-child { margin-bottom: 0; }
 .markdownWrapper p { margin: 0 0 16px 0; }
@@ -266,3 +266,165 @@
     background: rgba(96, 165, 250, 0.08);
     color: #bfdbfe;
 }
+
+
+.imageGenerating {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #d4d4d8;
+}
+
+.imageGeneratingFrame {
+    position: relative;
+    width: 92px;
+    height: 92px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    background:
+        linear-gradient(135deg, rgba(96, 165, 250, 0.18), rgba(168, 85, 247, 0.12)),
+        #202024;
+}
+
+.imageGeneratingSweep {
+    position: absolute;
+    inset: -40%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.24), transparent);
+    animation: imageSweep 1.4s ease-in-out infinite;
+}
+
+.imageGeneratingSparkles span {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #bfdbfe;
+    box-shadow: 0 0 16px rgba(191, 219, 254, 0.9);
+    animation: sparklePulse 1.6s ease-in-out infinite;
+}
+
+.imageGeneratingSparkles span:nth-child(1) {
+    top: 24px;
+    left: 26px;
+}
+
+.imageGeneratingSparkles span:nth-child(2) {
+    top: 48px;
+    left: 58px;
+    animation-delay: 0.22s;
+}
+
+.imageGeneratingSparkles span:nth-child(3) {
+    top: 66px;
+    left: 34px;
+    animation-delay: 0.44s;
+}
+
+.imageGeneratingText {
+    color: #a1a1aa;
+    font-size: 14px;
+}
+
+.generatedImageCard {
+    width: min(100%, 520px);
+    margin: 0;
+}
+
+.generatedImage {
+    display: block;
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: #111113;
+}
+
+.generatedImageCard figcaption {
+    margin-top: 8px;
+    color: #a1a1aa;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+@keyframes imageSweep {
+    0% {
+        transform: translateX(-45%) rotate(18deg);
+    }
+    100% {
+        transform: translateX(45%) rotate(18deg);
+    }
+}
+
+@keyframes sparklePulse {
+    0%, 100% {
+        opacity: 0.28;
+        transform: scale(0.72);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.18);
+    }
+}
+
+@media (max-width: 720px) {
+    .container {
+        padding: 24px 0;
+    }
+
+    .listInner {
+        gap: 28px;
+        padding: 0 14px;
+    }
+
+    .userBubbleContainer {
+        max-width: 88%;
+    }
+
+    .userBubble {
+        padding: 9px 14px;
+        border-radius: 16px;
+    }
+
+    .userText {
+        font-size: 14px;
+        overflow-wrap: anywhere;
+    }
+
+    .assistantContent {
+        padding-left: 14px;
+    }
+
+    .markdownWrapper {
+        font-size: 14.5px;
+        line-height: 1.75;
+        overflow-wrap: anywhere;
+    }
+
+    .markdownWrapper h1 {
+        font-size: 18px;
+    }
+
+    .markdownWrapper h2 {
+        font-size: 16.5px;
+    }
+
+    .markdownWrapper h3 {
+        font-size: 15.5px;
+    }
+
+    .markdownWrapper table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .sourceList {
+        gap: 6px;
+    }
+
+    .imageGeneratingFrame {
+        width: 76px;
+        height: 76px;
+    }
+}
+

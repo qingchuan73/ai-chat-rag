@@ -5,6 +5,7 @@ import ChatInput from "../chatInput/ChatInput";
 import SourcePreviewDrawer from "../sourcePreview/SourcePreviewDrawer";
 import { createConversation, getMessages, sendMessage } from "../../api/chat";
 import type { AttachmentItem, Message, MessageSource } from "../../types/message";
+import styles from "../../assets/ChatArea.module.css";
 
 const { Content } = Layout;
 
@@ -82,7 +83,16 @@ function ChatArea({
             content,
             attachments
         };
-        setMessages(prev => [...prev, userMessage, { role: "assistant", content: "", isLoading: true }]);
+        setMessages(prev => [
+            ...prev,
+            userMessage,
+            {
+                role: "assistant",
+                content: "",
+                isLoading: true,
+                loadingType: "text"
+            }
+        ]);
 
         const requestMessages = {
             conversation_id: activeId as number,
@@ -92,7 +102,7 @@ function ChatArea({
 
         try {
             let receivedFirstChunk = false;
-            await sendMessage(requestMessages, (chunk: { content?: string; sources?: MessageSource[] }) => {
+            await sendMessage(requestMessages, (chunk) => {
                 if (chunk.sources) {
                     setMessages(prev => {
                         const updated = [...prev];
@@ -100,6 +110,34 @@ function ChatArea({
                         updated[lastIndex] = {
                             ...updated[lastIndex],
                             sources: chunk.sources
+                        };
+                        return updated;
+                    });
+                    return;
+                }
+
+                if (chunk.type === "image" && chunk.image) {
+                    setMessages(prev => {
+                        const updated = [...prev];
+                        const lastIndex = updated.length - 1;
+                        updated[lastIndex] = {
+                            ...updated[lastIndex],
+                            content: chunk.image?.prompt || "",
+                            image: chunk.image,
+                            isLoading: false
+                        };
+                        return updated;
+                    });
+                    return;
+                }
+
+                if (chunk.type === "image_start") {
+                    setMessages(prev => {
+                        const updated = [...prev];
+                        const lastIndex = updated.length - 1;
+                        updated[lastIndex] = {
+                            ...updated[lastIndex],
+                            loadingType: "image"
                         };
                         return updated;
                     });
@@ -185,17 +223,9 @@ function ChatArea({
     const disabledReason = modelDisabled ? "请先在设置中配置模型 API Key 后再开始对话" : undefined;
 
     return (
-        <Layout style={{ height: "100%", width: "100%", background: "#18181b" }}>
+        <Layout className={styles.layout}>
             {showAnchor && anchorItems.length > 0 && (
-                <div className="custom-anchor-wrapper" style={{
-                    position: "fixed",
-                    right: "24px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    zIndex: 100,
-                    maxHeight: "60vh",
-                    overflowY: "auto"
-                }}>
+                <div className={styles.anchorWrapper}>
                     <Anchor
                         targetOffset={60}
                         getContainer={getScrollContainer}
@@ -205,16 +235,7 @@ function ChatArea({
                     />
                 </div>
             )}
-            <Content style={{
-                display: "flex",
-                flexDirection: "column",
-                height: "100%",
-                width: "100%",
-                maxWidth: "880px",
-                background: "#18181b",
-                padding: "0 16px",
-                margin: "0 auto"
-            }}>
+            <Content className={styles.content}>
                 {isEmptyChat ? (
                     <div className="empty-chat-shell">
                         <div className="empty-chat-center">
@@ -236,21 +257,14 @@ function ChatArea({
                     </div>
                 ) : (
                     <>
-                        <div style={{ flex: 1, overflow: "hidden", width: "100%", background: "#18181b" }}>
+                        <div className={styles.messagePanel}>
                             <MessageList
                                 messages={messages}
                                 onOpenSource={setPreviewSource}
                             />
                         </div>
-                        <div style={{
-                            background: "#18181b",
-                            padding: "16px 0 24px 0",
-                            width: "100%",
-                            borderTop: "1px solid rgba(255, 255, 255, 0.02)",
-                            display: "flex",
-                            justifyContent: "center"
-                        }}>
-                            <div style={{ width: "100%", maxWidth: "880px", padding: "0 24px", boxSizing: "border-box" }}>
+                        <div className={styles.inputBar}>
+                            <div className={styles.inputInner}>
                                 <ChatInput
                                     onSend={handleSend}
                                     disabled={modelDisabled}

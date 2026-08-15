@@ -209,7 +209,11 @@ def get_knowledge_file_response(
     return FileResponse(
         path=file_path,
         filename=knowledge_file.original_filename,
-        media_type="application/pdf" if knowledge_file.file_type == "pdf" else "application/octet-stream",
+        media_type=(
+            "application/pdf"
+            if knowledge_file.file_type == "pdf"
+            else "application/octet-stream"
+        ),
     )
 
 

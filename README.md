@@ -1,6 +1,6 @@
 ﻿# AI Chat RAG
 
-一个支持多用户、多会话、文件知识库和 RAG 检索增强的 AI 聊天系统。项目包含前端聊天交互、后端会话管理、文件知识库索引、混合检索、动态 RAG Prompt、引用来源展示和 Docker 部署配置。
+一个支持多用户、多会话、文件知识库、RAG 检索增强、多模型配置、图片识别和图片生成的 AI 聊天系统。项目包含前端聊天交互、后端会话管理、文件知识库索引、混合检索、动态 RAG Prompt、引用来源展示和 Docker 部署配置。
 
 ## 功能特性
 
@@ -9,9 +9,12 @@
 - MySQL 持久化保存用户、会话、消息、文件元数据和 RAG 监控记录
 - Redis 缓存最近对话上下文
 - 长对话 Summary Memory 压缩
-- 用户自定义 OpenAI 兼容模型配置
+- 用户自定义 OpenAI 兼容模型配置，支持多个模型配置切换
+- 可选配置生图模型，由聊天模型自动判断是否需要生成图片
 - 文件上传、删除、重新索引和知识库文件管理
 - PDF 与常见文本类型解析
+- 聊天图片附件独立上传，不进入知识库和 RAG
+- 多模态识图：图片附件直接进入视觉模型分支
 - 语义切片与多维 metadata 标注
 - Chroma 向量知识库
 - BM25 + 向量检索 Hybrid Search
@@ -44,6 +47,7 @@
 - sentence-transformers
 - jieba
 - rank-bm25
+- OpenAI SDK
 
 ## 系统架构
 
@@ -61,7 +65,13 @@ flowchart TD
     B --> K["RAG Router"]
     K --> L["Hybrid Search"]
     L --> M["动态 RAG Prompt"]
+    B --> O["聊天附件服务"]
+    O --> P["多模态识图"]
+    B --> S["Image Router"]
+    S --> T["图片生成"]
     M --> N["OpenAI 兼容模型"]
+    P --> N
+    T --> N
     N --> A
 ```
 
@@ -145,9 +155,57 @@ Embedding
 普通独立问题 -> 只走普通对话
 追问问题 -> 使用最近历史理解指代
 知识库问题 -> 检索知识库并动态注入 RAG Prompt
+图片附件问题 -> 跳过 RAG，直接走多模态识图
+生图请求 -> 由模型判断后走图片生成接口
 ```
 
 这样可以同时支持普通聊天和知识库问答，避免无关知识库内容污染普通回答。
+
+## 图片与附件
+
+图片附件和知识库文件是分离的：
+
+```text
+知识库文件
+  -> /api/file/upload
+  -> knowledge_file
+  -> 文档解析 / 切片 / Embedding / Chroma
+
+聊天图片附件
+  -> /api/attachment/upload
+  -> chat_attachment
+  -> 仅用于当前聊天的多模态输入
+  -> 不进入知识库列表
+  -> 不参与 RAG 检索
+```
+
+当前支持的图片附件类型：
+
+```text
+png, jpg, jpeg, webp, gif
+```
+
+## 图片生成
+
+图片生成不依赖前端手动切换按钮。后端会先让聊天模型判断当前问题是否需要生成图片：
+
+```text
+用户输入
+ ↓
+Image Router 判断 image / chat
+ ↓
+image -> 使用生图模型调用 /images/generations
+chat  -> 普通聊天或 RAG
+```
+
+模型配置中：
+
+- `Chat Model`：用于普通聊天、RAG、查询重写、Router 判断。
+- `生图模型`：可选，仅在需要生成图片时使用。
+
+如果未配置生图模型，系统会返回明确提示，不会拿聊天模型硬试图片接口。
+
+图片接口如果返回 base64，后端会保存成图片文件，并只把短 URL 写入数据库，避免 MySQL `TEXT` 字段被超长 base64 撑爆。
 
 ## RAG 监控
 
@@ -212,11 +270,19 @@ frontEnd/
 - `POST /api/file/{file_id}/reindex`：重新索引文件
 - `DELETE /api/file/{file_id}`：删除文件和对应向量
 
+### 聊天附件
+
+- `POST /api/attachment/upload`：上传聊天图片附件，不进入知识库
+
 ### 模型配置
 
 - `GET /api/settings/model`：获取当前模型配置状态
-- `POST /api/settings/model`：保存模型配置
-- `DELETE /api/settings/model`：删除模型配置
+- `GET /api/settings/models`：获取模型配置列表
+- `POST /api/settings/model`：新增模型配置
+- `PUT /api/settings/model/{config_id}`：更新模型配置
+- `POST /api/settings/model/{config_id}/default`：切换当前使用模型
+- `DELETE /api/settings/model/{config_id}`：删除指定模型配置
+- `DELETE /api/settings/model`：删除当前模型配置
 
 ### RAG 监控
 
@@ -271,6 +337,9 @@ CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 CHROMA_PATH=./chroma
 EMBEDDING_MODEL_NAME=BAAI/bge-small-zh
 EMBEDDING_LOCAL_ONLY=false
+
+# 可选：生成图片文件保存目录
+GENERATED_IMAGE_DIR=./generated_images
 ```
 
 前端生产构建可配置：
@@ -300,3 +369,5 @@ docker compose exec backend alembic upgrade head
 - 如果更新了切片逻辑，已有知识库文件需要执行重新索引。
 - 如果部署环境无法访问 HuggingFace，可以将 embedding 模型下载到本地并挂载到容器内。
 - 用户模型配置当前支持 OpenAI 兼容协议。
+- 如果某个模型只支持 Responses API，而不支持 Chat Completions，需要后端额外适配 Responses API 后才能使用。
+- 图片生成依赖服务商支持 `/images/generations`，并且需要填写对应的生图模型名称。

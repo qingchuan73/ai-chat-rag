@@ -9,6 +9,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getAllConversations } from "../api/chat";
 import { getModelConfig } from "../api/settings";
 import { getCurrentUser } from "../api/auth";
+import styles from "../assets/ChatPage.module.css";
 
 const { Sider } = Layout;
 
@@ -84,16 +85,12 @@ function ChatPage() {
     };
 
     return (
-        <Layout style={{ height: "100vh", background: "#18181b", overflow: "hidden" }}>
+        <Layout className={styles.page}>
             <Sider
                 width={260}
                 collapsed={collapsed}
                 collapsedWidth={80}
-                style={{
-                    background: "#111113",
-                    borderRight: "1px solid rgba(255, 255, 255, 0.04)",
-                    height: "100vh"
-                }}
+                className={styles.sider}
             >
                 <Sidebar
                     collapsed={collapsed}

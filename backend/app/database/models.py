@@ -53,10 +53,15 @@ class User(Base):
         back_populates="user"
     )
 
-    model_config=relationship(
+    chat_attachments=relationship(
+        "ChatAttachment",
+        back_populates="user",
+        cascade="all,delete"
+    )
+
+    model_configs=relationship(
         "UserModelConfig",
         back_populates="user",
-        uselist=False,
         cascade="all,delete"
     )
     
@@ -173,6 +178,47 @@ class KnowledgeFile(Base):
     )
 
 
+class ChatAttachment(Base):
+    __tablename__="chat_attachment"
+
+    id=Column(
+        Integer,
+        primary_key=True
+    )
+
+    user_id=Column(
+        Integer,
+        ForeignKey("user.id"),
+        nullable=False,
+        index=True
+    )
+
+    original_filename=Column(
+        String(255),
+        nullable=False
+    )
+
+    storage_filename=Column(
+        String(255),
+        nullable=False
+    )
+
+    file_type=Column(
+        String(50),
+        nullable=False
+    )
+
+    created_at=Column(
+        DateTime,
+        default=func.now()
+    )
+
+    user=relationship(
+        "User",
+        back_populates="chat_attachments"
+    )
+
+
 class UserModelConfig(Base):
     __tablename__="user_model_config"
 
@@ -184,9 +230,14 @@ class UserModelConfig(Base):
     user_id=Column(
         Integer,
         ForeignKey("user.id"),
-        unique=True,
         nullable=False,
         index=True
+    )
+
+    name=Column(
+        String(100),
+        nullable=False,
+        default="模型配置"
     )
 
     provider=Column(
@@ -205,9 +256,20 @@ class UserModelConfig(Base):
         nullable=False
     )
 
+    image_model=Column(
+        String(100),
+        nullable=True
+    )
+
     api_key_encrypted=Column(
         Text,
         nullable=False
+    )
+
+    is_default=Column(
+        String(10),
+        nullable=False,
+        default="false"
     )
 
     created_at=Column(
@@ -223,7 +285,7 @@ class UserModelConfig(Base):
 
     user=relationship(
         "User",
-        back_populates="model_config"
+        back_populates="model_configs"
     )
 
 
