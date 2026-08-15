@@ -38,7 +38,7 @@ function ImageGeneratingLoader() {
                     <span />
                 </div>
             </div>
-            <div className={styles.imageGeneratingText}>姝ｅ湪鐢熸垚鍥剧墖...</div>
+            <div className={styles.imageGeneratingText}>正在生成图片...</div>
         </div>
     );
 }
@@ -51,7 +51,7 @@ function GeneratedImageView({ image }: { image: GeneratedImage }) {
 
     return (
         <figure className={styles.generatedImageCard}>
-            <img src={imageUrl} alt={image.prompt || "鐢熸垚鍥剧墖"} className={styles.generatedImage} />
+            <img src={imageUrl} alt={image.prompt || "生成图片"} className={styles.generatedImage} />
             {image.prompt && <figcaption>{image.prompt}</figcaption>}
         </figure>
     );
@@ -64,7 +64,7 @@ function formatSource(source: MessageSource) {
     }
 
     if (typeof source.chunk_index === "number") {
-        return `${source.filename} 路 鐗囨 ${source.chunk_index}`;
+        return `${source.filename} - 片段 ${source.chunk_index}`;
     }
 
     return source.filename;
@@ -130,11 +130,33 @@ function MessageItem({
     const isUser = role === "user";
     const displaySources = getUniqueSources(sources);
 
+    const copyText = async (text: string) => {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+            return;
+        }
+
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        textarea.style.top = "0";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        try {
+            document.execCommand("copy");
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    };
+
     const handleCopy = () => {
-        navigator.clipboard.writeText(content).then(() => {
+        copyText(content).then(() => {
             antdMessage.success("已复制到剪贴板");
         }).catch(() => {
-            antdMessage.error("澶嶅埗澶辫触");
+            antdMessage.error("复制失败");
         });
     };
 
@@ -151,7 +173,7 @@ function MessageItem({
                     </div>
 
                     <div className={styles.userActions}>
-                        <button onClick={handleCopy} title="澶嶅埗"><CopyOutlined /></button>
+                        <button onClick={handleCopy} title="复制"><CopyOutlined /></button>
                     </div>
                 </div>
             ) : (
@@ -169,7 +191,7 @@ function MessageItem({
                     </div>
                     {!!displaySources.length && (
                         <div className={styles.sourceList}>
-                            <div className={styles.sourceTitle}>寮曠敤鏉ユ簮</div>
+                            <div className={styles.sourceTitle}>引用来源</div>
                             {displaySources.map((source, sourceIndex) => (
                                 <Tag
                                     key={`${source.filename}-${source.page || source.chunk_index}-${sourceIndex}`}
